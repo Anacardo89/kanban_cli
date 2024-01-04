@@ -13,7 +13,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer f.Close()
-	p := tea.NewProgram(ui.Model{}, tea.WithAltScreen())
+	p := tea.NewProgram(ui.New(), tea.WithAltScreen())
 	_, err = p.Run()
 	if err != nil {
 		log.Fatal(err)

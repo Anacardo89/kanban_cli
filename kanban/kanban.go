@@ -1,31 +1,40 @@
-package model
+/*
+Menu
+  |_Board
+	|_List
+	  |_Card
+		|_CheckList
+		|_Label
+*/
+
+package kanban
 
 import (
-	"image/color"
-
 	"github.com/Anacardo89/ds/lists/dll"
+	"github.com/charmbracelet/lipgloss"
 )
 
-type Label struct {
-	Title string
-	Color color.Color
+type Menu struct {
+	Boards dll.DLL
 }
 
-type CheckItem struct {
-	Title string
-	Check bool
+func StartMenu() *Menu {
+	return &Menu{
+		Boards: dll.New(),
+	}
 }
 
-type Card struct {
-	Title       string
-	Description string
-	CheckList   dll.DLL
-	Labels      dll.DLL
+func (m *Menu) AddBoard(title string) {
+	board := Board{
+		Title: title,
+		Lists: dll.New(),
+	}
+	m.Boards.Append(board)
 }
 
-type List struct {
-	Title string
-	Cards dll.DLL
+func (m *Menu) RemoveBoard(board dll.DLL) error {
+	_, err := m.Boards.Remove(board)
+	return err
 }
 
 type Board struct {
@@ -33,9 +42,8 @@ type Board struct {
 	Lists dll.DLL
 }
 
-func (b *Board) StartBoard(title string) {
+func (b *Board) RenameBoard(title string) {
 	b.Title = title
-	b.Lists = dll.New()
 }
 
 func (b *Board) AddList(title string) {
@@ -49,6 +57,11 @@ func (b *Board) AddList(title string) {
 func (b *Board) RemoveList(list dll.DLL) error {
 	_, err := b.Lists.Remove(list)
 	return err
+}
+
+type List struct {
+	Title string
+	Cards dll.DLL
 }
 
 func (l *List) RenameList(title string) {
@@ -67,6 +80,13 @@ func (l *List) AddCard(title string) {
 func (l *List) RemoveCard(card dll.DLL) error {
 	_, err := l.Cards.Remove(card)
 	return err
+}
+
+type Card struct {
+	Title       string
+	Description string
+	CheckList   dll.DLL
+	Labels      dll.DLL
 }
 
 func (c *Card) RenameCard(title string) {
@@ -90,15 +110,7 @@ func (c *Card) RemoveCheckItem(checkItem dll.DLL) error {
 	return err
 }
 
-func (c *CheckItem) RenameCheckItem(title string) {
-	c.Title = title
-}
-
-func (c *CheckItem) CheckCheckItem() {
-	c.Check = !c.Check
-}
-
-func (c *Card) AddLabel(title string, color color.Color) {
+func (c *Card) AddLabel(title string, color lipgloss.Color) {
 	label := Label{
 		Title: title,
 		Color: color,
@@ -109,4 +121,30 @@ func (c *Card) AddLabel(title string, color color.Color) {
 func (c *Card) RemoveLabel(label dll.DLL) error {
 	_, err := c.CheckList.Remove(label)
 	return err
+}
+
+type CheckItem struct {
+	Title string
+	Check bool
+}
+
+func (c *CheckItem) RenameCheckItem(title string) {
+	c.Title = title
+}
+
+func (c *CheckItem) CheckCheckItem() {
+	c.Check = !c.Check
+}
+
+type Label struct {
+	Title string
+	Color lipgloss.Color
+}
+
+func (l *Label) RenameLabel(title string) {
+	l.Title = title
+}
+
+func (l *Label) ChangeColor(color lipgloss.Color) {
+	l.Color = color
 }
