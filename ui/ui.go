@@ -5,8 +5,6 @@ import (
 )
 
 type Model struct {
-	listIdx int
-	cardIdx int
 }
 
 func (m Model) Init() tea.Cmd {
