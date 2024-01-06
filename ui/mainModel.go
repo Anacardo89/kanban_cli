@@ -8,21 +8,29 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type InputField struct {
+	field  textinput.Model
+	data   string
+	active bool
+}
+
 type MainModel struct {
-	witdh      int
-	height     int
-	menu       *kanban.Menu
-	cursor     int
-	inputField textinput.Model
-	input      string
-	current    *dll.Node
+	witdh   int
+	height  int
+	menu    *kanban.Menu
+	cursor  int
+	Input   InputField
+	current *dll.Node
 }
 
 func New() MainModel {
 	return MainModel{
-		cursor:     0,
-		menu:       kanban.StartMenu(),
-		inputField: textinput.New(),
+		cursor: 0,
+		menu:   kanban.StartMenu(),
+		Input: InputField{
+			field:  textinput.New(),
+			active: false,
+		},
 	}
 }
 
@@ -31,8 +39,24 @@ func (m MainModel) Init() tea.Cmd {
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	if m.menu.Boards.GetLength() > 0 {
 		m.current, _ = m.menu.Boards.WalkTo(m.cursor)
+	}
+	if m.Input.field.Focused() {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
+				m.Input.data = m.Input.field.Value()
+				m.menu.AddBoard(m.Input.data)
+				m.Input.data = ""
+				m.Input.field.Blur()
+				return m, nil
+			}
+		}
+		m.Input.field, cmd = m.Input.field.Update(msg)
+		return m, cmd
 	}
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -67,8 +91,9 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.current, _ = m.menu.Boards.WalkTo(m.cursor)
 			return m, nil
 		case "n":
-			m.inputField.Placeholder = "Name the Project: "
-			m.inputField.Focus()
+			m.Input.field.Placeholder = "Project Title"
+			m.Input.active = true
+			return m, m.Input.field.Focus()
 		}
 	}
 	return m, nil
@@ -80,12 +105,23 @@ func (m MainModel) View() string {
 		output += "Loading..."
 		return output
 	}
-	if m.menu.Boards.GetLength() == 0 {
+	if m.menu.Boards.GetLength() == 0 && !m.Input.active {
 		output += "No projects currently.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
 		style := EmptyStyle()
-		output = style.Render(output)
-		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, output)
+		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, style.Render(output))
 	}
 
+	if m.Input.active {
+		style := InputStyle()
+		output += lipgloss.Place(
+			m.witdh, m.height,
+			lipgloss.Left, lipgloss.Bottom,
+			lipgloss.JoinVertical(
+				lipgloss.Left,
+				style.Render(m.Input.field.View()),
+			),
+		)
+		return output
+	}
 	return output
 }
