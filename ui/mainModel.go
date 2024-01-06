@@ -47,6 +47,11 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
+			case tea.KeyEsc.String():
+				m.Input.field.Blur()
+				m.Input.field.SetValue("")
+				m.Input.active = false
+				return m, nil
 			case "enter":
 				m.Input.data = m.Input.field.Value()
 				m.menu.AddBoard(m.Input.data)
