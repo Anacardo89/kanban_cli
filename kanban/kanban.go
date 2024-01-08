@@ -1,10 +1,11 @@
 /*
 Menu
   |_Board
+    |_Label
 	|_List
 	  |_Card
 		|_CheckList
-		|_Label
+
 */
 
 package kanban
@@ -38,8 +39,9 @@ func (m *Menu) RemoveBoard(board dll.DLL) error {
 }
 
 type Board struct {
-	Title string
-	Lists dll.DLL
+	Title  string
+	Lists  dll.DLL
+	Labels dll.DLL
 }
 
 func (b *Board) RenameBoard(title string) {
@@ -57,6 +59,32 @@ func (b *Board) AddList(title string) {
 func (b *Board) RemoveList(list dll.DLL) error {
 	_, err := b.Lists.Remove(list)
 	return err
+}
+
+func (b *Board) AddLabel(title string, color lipgloss.Color) {
+	label := Label{
+		Title: title,
+		Color: color,
+	}
+	b.Labels.Append(label)
+}
+
+func (b *Board) RemoveLabel(label dll.DLL) error {
+	_, err := b.Labels.Remove(label)
+	return err
+}
+
+type Label struct {
+	Title string
+	Color lipgloss.Color
+}
+
+func (l *Label) RenameLabel(title string) {
+	l.Title = title
+}
+
+func (l *Label) ChangeColor(color lipgloss.Color) {
+	l.Color = color
 }
 
 type List struct {
@@ -110,16 +138,12 @@ func (c *Card) RemoveCheckItem(checkItem dll.DLL) error {
 	return err
 }
 
-func (c *Card) AddLabel(title string, color lipgloss.Color) {
-	label := Label{
-		Title: title,
-		Color: color,
-	}
+func (c *Card) AddLabel(label Label) {
 	c.Labels.Append(label)
 }
 
 func (c *Card) RemoveLabel(label dll.DLL) error {
-	_, err := c.CheckList.Remove(label)
+	_, err := c.Labels.Remove(label)
 	return err
 }
 
@@ -134,17 +158,4 @@ func (c *CheckItem) RenameCheckItem(title string) {
 
 func (c *CheckItem) CheckCheckItem() {
 	c.Check = !c.Check
-}
-
-type Label struct {
-	Title string
-	Color lipgloss.Color
-}
-
-func (l *Label) RenameLabel(title string) {
-	l.Title = title
-}
-
-func (l *Label) ChangeColor(color lipgloss.Color) {
-	l.Color = color
 }

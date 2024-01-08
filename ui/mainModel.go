@@ -47,7 +47,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
-			case tea.KeyEsc.String():
+			case "esc":
 				m.Input.field.Blur()
 				m.Input.field.SetValue("")
 				m.Input.active = false
