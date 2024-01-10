@@ -1,7 +1,10 @@
 package storage
 
 import (
+	"log"
+
 	"github.com/charmbracelet/lipgloss"
+	"gopkg.in/yaml.v2"
 )
 
 type Menu struct {
@@ -34,4 +37,13 @@ type Card struct {
 type CheckItem struct {
 	Title string `yaml:"title"`
 	Check bool   `yaml:"check"`
+}
+
+func (m *Menu) ToYAML() string {
+	data, err := yaml.Marshal(m)
+	if err != nil {
+		log.Println(err)
+	}
+	datastr := string(data)
+	return datastr
 }
