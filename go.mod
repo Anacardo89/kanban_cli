@@ -3,10 +3,11 @@ module github.com/Anacardo89/kanban_cli
 go 1.21.4
 
 require (
-	github.com/Anacardo89/ds v0.0.0-20240105130231-ecc6642c0d89
+	github.com/Anacardo89/ds v0.0.0-20240106164007-01a299dff500
 	github.com/charmbracelet/bubbles v0.17.1
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -22,6 +23,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sahilm/fuzzy v0.1.1-0.20230530133925-c48e322e2a8f // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
