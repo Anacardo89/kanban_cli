@@ -5,16 +5,14 @@ Menu
 	|_List
 	  |_Card
 		|_CheckList
-
+		|_CardLabels
 */
 
 package kanban
 
 import (
 	"github.com/Anacardo89/ds/lists/dll"
-	"github.com/Anacardo89/kanban_cli/storage"
 	"github.com/charmbracelet/lipgloss"
-	"gopkg.in/yaml.v2"
 )
 
 type Menu struct {
@@ -166,41 +164,4 @@ func (c *CheckItem) RenameCheckItem(title string) {
 
 func (c *CheckItem) CheckCheckItem() {
 	c.Check = !c.Check
-}
-
-func dllToSlice(list dll.DLL) []interface{} {
-	var result []interface{}
-	node, _ := list.WalkTo(0)
-	for ; node != nil; node, _ = node.Next() {
-		result = append(result, node.GetVal())
-	}
-	return result
-}
-
-func (m *Menu) MarshalYAML() ([]byte, error) {
-	data := struct {
-		Projects []interface{} `yaml:"projects"`
-	}{
-		Projects: dLLToSlice(m.Projects),
-	}
-	return yaml.Marshal(data)
-}
-
-func (m *Menu) toYAML() *storage.Menu {
-	projectNode, _ := m.Projects.WalkTo(0)
-	projectVal := projectNode.GetVal().(Project)
-	listNode, _ := projectVal.Lists.WalkTo(0)
-	listVal := listNode.GetVal().(List)
-	labelNode, _ := projectVal.Labels.WalkTo(0)
-	labelVal := labelNode.GetVal().(Label)
-	cardNode, _ := listVal.Cards.WalkTo(0)
-	cardVal := cardNode.GetVal().(Card)
-	checkNode, _ := cardVal.CheckList.WalkTo(0)
-	checkVal := checkNode.GetVal().(Card)
-	cardLabelNode, _ := cardVal.CardLabels.WalkTo(0)
-	cardLabelVal := cardLabelNode.GetVal().(Card)
-
-	for i := 0; i < m.Projects.GetLength()-1; i++ {
-
-	}
 }
