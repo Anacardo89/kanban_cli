@@ -1,21 +1,28 @@
 package main
 
 import (
-	"log"
-
-	"github.com/Anacardo89/kanban_cli/ui"
-	tea "github.com/charmbracelet/bubbletea"
+	"fmt"
 )
 
 func main() {
-	f, err := tea.LogToFile("log.log", "error")
+	menu := TestData()
+	data, err := menu.MarshalYAML()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
-	defer f.Close()
-	p := tea.NewProgram(ui.New(), tea.WithAltScreen())
-	_, err = p.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	datastr := string(data)
+	fmt.Println(datastr)
 }
+
+// func main() {
+// 	f, err := tea.LogToFile("log.log", "error")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer f.Close()
+// 	p := tea.NewProgram(ui.New(), tea.WithAltScreen())
+// 	_, err = p.Run()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
