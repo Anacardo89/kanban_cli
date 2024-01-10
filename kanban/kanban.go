@@ -55,7 +55,7 @@ func StartMenu() *Menu {
 }
 
 func (m *Menu) AddProject(title string) {
-	project := Project{
+	project := &Project{
 		Title: title,
 		Lists: dll.New(),
 	}
@@ -73,7 +73,7 @@ func (p *Project) RenameProject(title string) {
 }
 
 func (p *Project) AddList(title string) {
-	list := List{
+	list := &List{
 		Title: title,
 		Cards: dll.New(),
 	}
@@ -86,7 +86,7 @@ func (p *Project) RemoveList(list dll.DLL) error {
 }
 
 func (p *Project) AddLabel(title string, color lipgloss.Color) {
-	label := Label{
+	label := &Label{
 		Title: title,
 		Color: color,
 	}
@@ -113,7 +113,7 @@ func (l *List) RenameList(title string) {
 }
 
 func (l *List) AddCard(title string) {
-	card := Card{
+	card := &Card{
 		Title:      title,
 		CheckList:  dll.New(),
 		CardLabels: dll.New(),
@@ -136,7 +136,7 @@ func (c *Card) AddDescription(description string) {
 }
 
 func (c *Card) AddCheckItem(title string) {
-	checkItem := CheckItem{
+	checkItem := &CheckItem{
 		Title: title,
 		Check: false,
 	}

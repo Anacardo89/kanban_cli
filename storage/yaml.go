@@ -47,3 +47,7 @@ func (m *Menu) ToYAML() string {
 	datastr := string(data)
 	return datastr
 }
+
+func ToFile(string) {
+
+}
