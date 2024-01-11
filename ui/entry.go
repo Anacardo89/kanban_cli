@@ -29,15 +29,11 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case modelState:
-		m.state = msg
-		switch msg {
-		case menu:
-			updatedMenu, _ := m.menu.Update(msg)
-			m.menu = updatedMenu.(Menu)
-			return m, nil
-		}
+	switch m.state {
+	case menu:
+		updatedMenu, cmd := m.menu.Update(msg)
+		m.menu = updatedMenu.(Menu)
+		return m, cmd
 	}
 	return m, nil
 }
