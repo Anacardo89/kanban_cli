@@ -1,8 +1,10 @@
 package ui
 
 import (
-	"github.com/Anacardo89/ds/lists/dll"
+	"log"
+
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -14,12 +16,12 @@ type InputField struct {
 }
 
 type Menu struct {
-	witdh    int
-	height   int
-	menu     *kanban.Menu
-	cursor   int
-	selected *dll.Node
-	Input    InputField
+	witdh  int
+	height int
+	menu   *kanban.Menu
+	list   list.Model
+	cursor int
+	Input  InputField
 }
 
 func NewMenu() Menu {
@@ -27,6 +29,7 @@ func NewMenu() Menu {
 		cursor: 0,
 		menu:   kanban.StartMenu(),
 		Input:  InputField{field: textinput.New()},
+		list:   list.New([]list.Item{}, list.NewDefaultDelegate(), 30, 20),
 	}
 }
 
@@ -51,10 +54,12 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "up":
 			m.handleMoveUp()
-			return m, nil
+			m.list, cmd = m.list.Update(msg)
+			return m, cmd
 		case "down":
 			m.handleMoveDown()
-			return m, nil
+			m.list, cmd = m.list.Update(msg)
+			return m, cmd
 		case "n":
 			m.setInput()
 			return m, m.Input.field.Focus()
@@ -66,18 +71,17 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Menu) View() string {
 	output := ""
 	if m.menu.Projects.GetLength() == 0 && !m.Input.field.Focused() {
-		output += "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
-		style := EmptyStyle()
-		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, style.Render(output))
+		output = "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
+		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, emptyStyle.Render(output))
+	}
+	if m.menu.Projects.GetLength() > 0 {
+		output = lipgloss.Place(0, 0, lipgloss.Left, lipgloss.Top, menuListStyle.Render(m.list.View()))
 	}
 	if m.Input.field.Focused() {
-		style := InputStyle()
-		output += lipgloss.Place(
-			m.witdh, m.height,
-			lipgloss.Left, lipgloss.Bottom,
+		output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Bottom,
 			lipgloss.JoinVertical(
 				lipgloss.Left,
-				style.Render(m.Input.field.View()),
+				inputStyle.Render(m.Input.field.View()),
 			),
 		)
 		return output
@@ -86,29 +90,17 @@ func (m Menu) View() string {
 }
 
 func (m *Menu) handleMoveUp() {
-	if m.menu.Projects.GetLength() == 0 {
-		return
-	}
-	if m.cursor == 0 {
-		m.cursor = m.menu.Projects.GetLength() - 1
-		m.selected, _ = m.menu.Projects.WalkTo(m.cursor)
+	if m.menu.Projects.GetLength() == 0 || m.cursor == 0 {
 		return
 	}
 	m.cursor--
-	m.selected, _ = m.selected.Prev()
 }
 
 func (m *Menu) handleMoveDown() {
-	if m.menu.Projects.GetLength() == 0 {
-		return
-	}
-	if m.cursor == m.menu.Projects.GetLength()-1 {
-		m.cursor = 0
-		m.selected, _ = m.menu.Projects.WalkTo(m.cursor)
+	if m.menu.Projects.GetLength() == 0 || m.cursor == m.menu.Projects.GetLength()-1 {
 		return
 	}
 	m.cursor++
-	m.selected, _ = m.selected.Next()
 }
 
 func (m *Menu) setInput() {
@@ -120,11 +112,18 @@ func (m *Menu) setInput() {
 func (m *Menu) handleInput(key string) {
 	switch key {
 	case "esc":
-		m.Input.field.Blur()
 		m.Input.field.SetValue("")
+		m.Input.data = ""
+		m.Input.field.Blur()
 		return
 	case "enter":
+		log.Println(m.Input.field.Value())
 		m.Input.data = m.Input.field.Value()
+		menuItem := menuItem{
+			title: m.Input.data,
+		}
+		menuItems = append(menuItems, menuItem)
+		m.list.SetItems(menuItems)
 		m.menu.AddProject(m.Input.data)
 		m.Input.data = ""
 		m.Input.field.Blur()
