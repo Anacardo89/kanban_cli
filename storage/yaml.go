@@ -13,11 +13,11 @@ type Menu struct {
 
 type Project struct {
 	Title  string  `yaml:"title"`
-	Lists  []List  `yaml:"lists"`
+	Boards []Board `yaml:"lists"`
 	Labels []Label `yaml:"labels"`
 }
 
-type List struct {
+type Board struct {
 	Title string `yaml:"title"`
 	Cards []Card `yaml:"cards"`
 }

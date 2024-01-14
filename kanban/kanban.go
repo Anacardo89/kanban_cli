@@ -21,11 +21,11 @@ type Menu struct {
 
 type Project struct {
 	Title  string
-	Lists  dll.DLL
+	Boards dll.DLL
 	Labels dll.DLL
 }
 
-type List struct {
+type Board struct {
 	Title string
 	Cards dll.DLL
 }
@@ -56,8 +56,8 @@ func StartMenu() *Menu {
 
 func (m *Menu) AddProject(title string) {
 	project := &Project{
-		Title: title,
-		Lists: dll.New(),
+		Title:  title,
+		Boards: dll.New(),
 	}
 	m.Projects.Append(project)
 }
@@ -72,16 +72,16 @@ func (p *Project) RenameProject(title string) {
 	p.Title = title
 }
 
-func (p *Project) AddList(title string) {
-	list := &List{
+func (p *Project) AddBoard(title string) {
+	board := &Board{
 		Title: title,
 		Cards: dll.New(),
 	}
-	p.Lists.Append(list)
+	p.Boards.Append(board)
 }
 
-func (p *Project) RemoveList(list dll.DLL) error {
-	_, err := p.Lists.Remove(list)
+func (p *Project) RemoveBoard(board dll.DLL) error {
+	_, err := p.Boards.Remove(board)
 	return err
 }
 
@@ -107,22 +107,22 @@ func (l *Label) ChangeColor(color lipgloss.Color) {
 	l.Color = color
 }
 
-// List
-func (l *List) RenameList(title string) {
-	l.Title = title
+// Board
+func (b *Board) RenameList(title string) {
+	b.Title = title
 }
 
-func (l *List) AddCard(title string) {
+func (b *Board) AddCard(title string) {
 	card := &Card{
 		Title:      title,
 		CheckList:  dll.New(),
 		CardLabels: dll.New(),
 	}
-	l.Cards.Append(card)
+	b.Cards.Append(card)
 }
 
-func (l *List) RemoveCard(card dll.DLL) error {
-	_, err := l.Cards.Remove(card)
+func (b *Board) RemoveCard(card dll.DLL) error {
+	_, err := b.Cards.Remove(card)
 	return err
 }
 

@@ -18,7 +18,7 @@ func (m *Menu) projectsToStorage() []storage.Project {
 		projectVal := projectNode.GetVal().(*Project)
 		project := storage.Project{
 			Title:  projectVal.Title,
-			Lists:  projectVal.listsToStorage(),
+			Boards: projectVal.boardsToStorage(),
 			Labels: projectVal.labelsToStorage(),
 		}
 		projects = append(projects, project)
@@ -26,18 +26,18 @@ func (m *Menu) projectsToStorage() []storage.Project {
 	return projects
 }
 
-func (p *Project) listsToStorage() []storage.List {
-	lists := []storage.List{}
-	for i := 0; i < p.Lists.GetLength(); i++ {
-		listNode, _ := p.Lists.WalkTo(i)
-		listVal := listNode.GetVal().(*List)
-		list := storage.List{
-			Title: listVal.Title,
-			Cards: listVal.cardsToStorage(),
+func (p *Project) boardsToStorage() []storage.Board {
+	boards := []storage.Board{}
+	for i := 0; i < p.Boards.GetLength(); i++ {
+		boardNode, _ := p.Boards.WalkTo(i)
+		boardVal := boardNode.GetVal().(*Board)
+		board := storage.Board{
+			Title: boardVal.Title,
+			Cards: boardVal.cardsToStorage(),
 		}
-		lists = append(lists, list)
+		boards = append(boards, board)
 	}
-	return lists
+	return boards
 }
 
 func (p *Project) labelsToStorage() []storage.Label {
@@ -54,10 +54,10 @@ func (p *Project) labelsToStorage() []storage.Label {
 	return labels
 }
 
-func (l *List) cardsToStorage() []storage.Card {
+func (b *Board) cardsToStorage() []storage.Card {
 	cards := []storage.Card{}
-	for i := 0; i < l.Cards.GetLength(); i++ {
-		cardNode, _ := l.Cards.WalkTo(i)
+	for i := 0; i < b.Cards.GetLength(); i++ {
+		cardNode, _ := b.Cards.WalkTo(i)
 		cardVal := cardNode.GetVal().(*Card)
 		card := storage.Card{
 			Title:       cardVal.Title,
