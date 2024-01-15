@@ -25,11 +25,15 @@ type Menu struct {
 }
 
 func NewMenu() Menu {
+	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 30, 20)
+	l.SetShowHelp(false)
+	l.Title = "Projects"
+	l.InfiniteScrolling = true
 	return Menu{
 		cursor: 0,
 		menu:   kanban.StartMenu(),
 		Input:  InputField{field: textinput.New()},
-		list:   list.New([]list.Item{}, list.NewDefaultDelegate(), 30, 20),
+		list:   l,
 	}
 }
 
@@ -90,14 +94,22 @@ func (m Menu) View() string {
 }
 
 func (m *Menu) handleMoveUp() {
-	if m.menu.Projects.GetLength() == 0 || m.cursor == 0 {
+	if m.menu.Projects.GetLength() == 0 {
+		return
+	}
+	if m.cursor == 0 {
+		m.cursor = m.menu.Projects.GetLength() - 1
 		return
 	}
 	m.cursor--
 }
 
 func (m *Menu) handleMoveDown() {
-	if m.menu.Projects.GetLength() == 0 || m.cursor == m.menu.Projects.GetLength()-1 {
+	if m.menu.Projects.GetLength() == 0 {
+		return
+	}
+	if m.cursor == m.menu.Projects.GetLength()-1 {
+		m.cursor = 0
 		return
 	}
 	m.cursor++
