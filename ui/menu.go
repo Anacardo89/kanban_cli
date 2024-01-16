@@ -18,6 +18,7 @@ type InputField struct {
 type Menu struct {
 	witdh  int
 	height int
+	styles []lipgloss.Style
 	menu   *kanban.Menu
 	list   list.Model
 	cursor int
@@ -30,6 +31,7 @@ func NewMenu() Menu {
 	l.Title = "Projects"
 	l.InfiniteScrolling = true
 	return Menu{
+		styles: make([]lipgloss.Style, 5),
 		cursor: 0,
 		menu:   kanban.StartMenu(),
 		Input:  InputField{field: textinput.New()},
@@ -47,6 +49,8 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.witdh = msg.Width
 		m.height = msg.Height
+		m.SetStyles()
+		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {
 			m.handleInput(msg.String())
@@ -73,25 +77,46 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Menu) View() string {
-	output := ""
-	if m.menu.Projects.GetLength() == 0 && !m.Input.field.Focused() {
-		output = "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
-		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, emptyStyle.Render(output))
+	if m.witdh == 0 {
+		return "loading..."
 	}
-	if m.menu.Projects.GetLength() > 0 {
-		output = lipgloss.Place(0, 0, lipgloss.Left, lipgloss.Top, menuListStyle.Render(m.list.View()))
+	emptyTxtStyled := ""
+	inputStyled := ""
+	output := ""
+	if m.menu.Projects.GetLength() == 0 {
+		emptyTxt := "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
+		emptyTxtStyled = m.styles[empty].Render(emptyTxt)
 	}
 	if m.Input.field.Focused() {
-		output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Bottom,
-			lipgloss.JoinVertical(
-				lipgloss.Left,
-				inputStyle.Render(m.Input.field.View()),
-			),
-		)
-		return output
+		inputStyled = m.styles[input].Render(m.Input.field.View())
 	}
+	output = lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, inputStyled))
 	return output
 }
+
+// func (m Menu) View() string {
+// 	if m.witdh == 0 {
+// 		return "loading..."
+// 	}
+// 	output := ""
+// 	if m.menu.Projects.GetLength() == 0 && !m.Input.field.Focused() {
+// 		output = "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
+// 		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, m.styles[empty].Render(output))
+// 	}
+// 	if m.menu.Projects.GetLength() > 0 {
+// 		output = lipgloss.Place(0, 0, lipgloss.Left, lipgloss.Top, m.styles[listStyle].Render(m.list.View()))
+// 	}
+// 	if m.Input.field.Focused() {
+// 		output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Bottom,
+// 			lipgloss.JoinVertical(
+// 				lipgloss.Left,
+// 				m.styles[input].Render(m.Input.field.View()),
+// 			),
+// 		)
+// 		return output
+// 	}
+// 	return output
+// }
 
 func (m *Menu) handleMoveUp() {
 	if m.menu.Projects.GetLength() == 0 {
