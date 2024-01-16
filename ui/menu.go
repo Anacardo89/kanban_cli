@@ -26,16 +26,11 @@ type Menu struct {
 }
 
 func NewMenu() Menu {
-	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 30, 20)
-	l.SetShowHelp(false)
-	l.Title = "Projects"
-	l.InfiniteScrolling = true
 	return Menu{
 		styles: make([]lipgloss.Style, 5),
 		cursor: 0,
 		menu:   kanban.StartMenu(),
 		Input:  InputField{field: textinput.New()},
-		list:   l,
 	}
 }
 
@@ -50,6 +45,7 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.witdh = msg.Width
 		m.height = msg.Height
 		m.SetStyles()
+		m.SetupList()
 		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {
@@ -80,17 +76,33 @@ func (m Menu) View() string {
 	if m.witdh == 0 {
 		return "loading..."
 	}
-	emptyTxtStyled := ""
-	inputStyled := ""
-	output := ""
+	var (
+		bottomLines    = ""
+		emptyTxtStyled = ""
+		inputStyled    = ""
+		menustyled     = ""
+		output         = ""
+	)
+
 	if m.menu.Projects.GetLength() == 0 {
 		emptyTxt := "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
 		emptyTxtStyled = m.styles[empty].Render(emptyTxt)
+		if m.Input.field.Focused() {
+			_, h := lipgloss.Size(emptyTxtStyled)
+			for i := 0; i < m.height-h-h/2; i++ {
+				bottomLines += "\n"
+			}
+			inputStyled = m.styles[input].Render(m.Input.field.View())
+		}
+		output = lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, bottomLines, inputStyled))
+		return output
 	}
+
+	menustyled = m.styles[listStyle].Render(m.list.View())
 	if m.Input.field.Focused() {
 		inputStyled = m.styles[input].Render(m.Input.field.View())
 	}
-	output = lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, inputStyled))
+	output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Left, menustyled, bottomLines, inputStyled))
 	return output
 }
 
