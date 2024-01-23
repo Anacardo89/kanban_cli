@@ -43,6 +43,8 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return p, tea.Quit
+		case "n":
+
 		}
 	}
 	return p, nil
@@ -56,7 +58,7 @@ func (p Project) View() string {
 	bottomLines := ""
 	inputStyled := ""
 	output := ""
-	if p.project.Boards.GetLength() == 0 {
+	if p.project.Boards.Length() == 0 {
 		emptyTxt := "No Boards.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
 		emptyTxtStyled = p.styles[empty].Render(emptyTxt)
 		if p.Input.field.Focused() {

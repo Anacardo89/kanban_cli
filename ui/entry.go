@@ -50,7 +50,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.menu = updatedMenu.(Menu)
 		return m, cmd
 	case project:
-		m.sp = m.menu.selected
+		m.sp = m.menu.selected.Val().(*kanban.Project)
 		m.project = OpenProject(m.sp)
 		updatedProject, cmd := m.project.Update(msg)
 		m.project = updatedProject.(Project)

@@ -3,6 +3,7 @@ package ui
 import (
 	"log"
 
+	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -14,7 +15,7 @@ type Menu struct {
 	styles   []lipgloss.Style
 	menu     *kanban.Menu
 	cursor   int
-	selected *kanban.Project
+	selected *dll.Node
 	list     list.Model
 	Input    InputField
 }
@@ -85,7 +86,7 @@ func (m Menu) View() string {
 		output         = ""
 	)
 
-	if m.menu.Projects.GetLength() == 0 {
+	if m.menu.Projects.Length() == 0 {
 		emptyTxt := "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
 		emptyTxtStyled = m.styles[empty].Render(emptyTxt)
 		if m.Input.field.Focused() {
@@ -108,56 +109,58 @@ func (m Menu) View() string {
 }
 
 func (m *Menu) handleMoveUp() {
-	if m.menu.Projects.GetLength() == 0 {
+	if m.menu.Projects.Length() == 0 {
 		return
 	}
+	var err error
+	var node *dll.Node
 	if m.cursor == 0 {
-		m.cursor = m.menu.Projects.GetLength() - 1
-		node, err := m.menu.Projects.WalkTo(m.menu.Projects.GetLength() - 1)
+		m.cursor = m.menu.Projects.Length() - 1
+		node, err = m.menu.Projects.TailNode()
 		if err != nil {
 			log.Println(err)
 		}
-		m.selected = node.GetVal().(*kanban.Project)
+		m.selected = node
 		return
 	}
 	m.cursor--
-	node, err := m.menu.Projects.WalkTo(m.cursor)
+	m.selected, err = m.selected.Prev()
 	if err != nil {
 		log.Println(err)
 	}
-	m.selected = node.GetVal().(*kanban.Project)
 }
 
 func (m *Menu) handleMoveDown() {
-	if m.menu.Projects.GetLength() == 0 {
+	if m.menu.Projects.Length() == 0 {
 		return
 	}
-	if m.cursor == m.menu.Projects.GetLength()-1 {
+	var err error
+	var node *dll.Node
+	if m.cursor == m.menu.Projects.Length()-1 {
 		m.cursor = 0
-		node, err := m.menu.Projects.WalkTo(0)
+		node, err = m.menu.Projects.HeadNode()
 		if err != nil {
 			log.Println(err)
 		}
-		m.selected = node.GetVal().(*kanban.Project)
+		m.selected = node
 		return
 	}
 	m.cursor++
-	node, err := m.menu.Projects.WalkTo(m.cursor)
+	m.selected, err = m.selected.Prev()
 	if err != nil {
 		log.Println(err)
 	}
-	m.selected = node.GetVal().(*kanban.Project)
 }
 
 func (m *Menu) getProject() *kanban.Project {
-	if m.menu.Projects.GetLength() == 0 {
+	if m.menu.Projects.Length() == 0 {
 		return nil
 	}
 	node, err := m.menu.Projects.WalkTo(m.cursor)
 	if err != nil {
 		log.Println(err)
 	}
-	return node.GetVal().(*kanban.Project)
+	return node.Val().(*kanban.Project)
 }
 
 func (m *Menu) setInput() {
@@ -182,19 +185,14 @@ func (m *Menu) handleInput(key string) {
 		menuItems = append(menuItems, menuItem)
 		m.list.SetItems(menuItems)
 		m.menu.AddProject(m.Input.data)
-		node, err := m.menu.Projects.WalkTo(m.menu.Projects.GetLength() - 1)
-		if err != nil {
-			log.Println(err)
-		}
-		m.selected = node.GetVal().(*kanban.Project)
 		m.Input.data = ""
 		m.Input.field.Blur()
 		m.cursor = 0
-		node, err = m.menu.Projects.WalkTo(0)
+		node, err := m.menu.Projects.HeadNode()
 		if err != nil {
 			log.Println(err)
 		}
-		m.selected = node.GetVal().(*kanban.Project)
+		m.selected = node
 		return
 	}
 }
