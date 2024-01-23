@@ -10,19 +10,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type InputField struct {
-	field textinput.Model
-	data  string
-}
-
 type Menu struct {
-	witdh  int
-	height int
-	styles []lipgloss.Style
-	menu   *kanban.Menu
-	list   list.Model
-	cursor int
-	Input  InputField
+	styles   []lipgloss.Style
+	menu     *kanban.Menu
+	cursor   int
+	selected *kanban.Project
+	list     list.Model
+	Input    InputField
 }
 
 func NewMenu() Menu {
@@ -42,8 +36,8 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.witdh = msg.Width
-		m.height = msg.Height
+		ws.width = msg.Width
+		ws.height = msg.Height
 		m.SetStyles()
 		m.SetupList()
 		return m, nil
@@ -64,16 +58,23 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.handleMoveDown()
 			m.list, cmd = m.list.Update(msg)
 			return m, cmd
+		case "enter":
+			p := m.getProject()
+			if p == nil {
+				return m, nil
+			}
+			return m, func() tea.Msg { return project }
 		case "n":
 			m.setInput()
 			return m, m.Input.field.Focus()
 		}
+
 	}
 	return m, nil
 }
 
 func (m Menu) View() string {
-	if m.witdh == 0 {
+	if ws.width == 0 {
 		return "loading..."
 	}
 	var (
@@ -89,12 +90,12 @@ func (m Menu) View() string {
 		emptyTxtStyled = m.styles[empty].Render(emptyTxt)
 		if m.Input.field.Focused() {
 			_, h := lipgloss.Size(emptyTxtStyled)
-			for i := 0; i < m.height-h-h/2; i++ {
+			for i := 0; i < ws.height-h-h/2; i++ {
 				bottomLines += "\n"
 			}
 			inputStyled = m.styles[input].Render(m.Input.field.View())
 		}
-		output = lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, bottomLines, inputStyled))
+		output = lipgloss.Place(ws.width, ws.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, bottomLines, inputStyled))
 		return output
 	}
 
@@ -102,33 +103,9 @@ func (m Menu) View() string {
 	if m.Input.field.Focused() {
 		inputStyled = m.styles[input].Render(m.Input.field.View())
 	}
-	output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Left, menustyled, bottomLines, inputStyled))
+	output = lipgloss.Place(ws.width, ws.height, lipgloss.Left, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Left, menustyled, bottomLines, inputStyled))
 	return output
 }
-
-// func (m Menu) View() string {
-// 	if m.witdh == 0 {
-// 		return "loading..."
-// 	}
-// 	output := ""
-// 	if m.menu.Projects.GetLength() == 0 && !m.Input.field.Focused() {
-// 		output = "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
-// 		return lipgloss.Place(m.witdh, m.height, lipgloss.Center, lipgloss.Center, m.styles[empty].Render(output))
-// 	}
-// 	if m.menu.Projects.GetLength() > 0 {
-// 		output = lipgloss.Place(0, 0, lipgloss.Left, lipgloss.Top, m.styles[listStyle].Render(m.list.View()))
-// 	}
-// 	if m.Input.field.Focused() {
-// 		output = lipgloss.Place(m.witdh, m.height, lipgloss.Left, lipgloss.Bottom,
-// 			lipgloss.JoinVertical(
-// 				lipgloss.Left,
-// 				m.styles[input].Render(m.Input.field.View()),
-// 			),
-// 		)
-// 		return output
-// 	}
-// 	return output
-// }
 
 func (m *Menu) handleMoveUp() {
 	if m.menu.Projects.GetLength() == 0 {
@@ -136,9 +113,19 @@ func (m *Menu) handleMoveUp() {
 	}
 	if m.cursor == 0 {
 		m.cursor = m.menu.Projects.GetLength() - 1
+		node, err := m.menu.Projects.WalkTo(m.menu.Projects.GetLength() - 1)
+		if err != nil {
+			log.Println(err)
+		}
+		m.selected = node.GetVal().(*kanban.Project)
 		return
 	}
 	m.cursor--
+	node, err := m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
+	m.selected = node.GetVal().(*kanban.Project)
 }
 
 func (m *Menu) handleMoveDown() {
@@ -147,9 +134,30 @@ func (m *Menu) handleMoveDown() {
 	}
 	if m.cursor == m.menu.Projects.GetLength()-1 {
 		m.cursor = 0
+		node, err := m.menu.Projects.WalkTo(0)
+		if err != nil {
+			log.Println(err)
+		}
+		m.selected = node.GetVal().(*kanban.Project)
 		return
 	}
 	m.cursor++
+	node, err := m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
+	m.selected = node.GetVal().(*kanban.Project)
+}
+
+func (m *Menu) getProject() *kanban.Project {
+	if m.menu.Projects.GetLength() == 0 {
+		return nil
+	}
+	node, err := m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
+	return node.GetVal().(*kanban.Project)
 }
 
 func (m *Menu) setInput() {
@@ -174,8 +182,19 @@ func (m *Menu) handleInput(key string) {
 		menuItems = append(menuItems, menuItem)
 		m.list.SetItems(menuItems)
 		m.menu.AddProject(m.Input.data)
+		node, err := m.menu.Projects.WalkTo(m.menu.Projects.GetLength() - 1)
+		if err != nil {
+			log.Println(err)
+		}
+		m.selected = node.GetVal().(*kanban.Project)
 		m.Input.data = ""
 		m.Input.field.Blur()
+		m.cursor = 0
+		node, err = m.menu.Projects.WalkTo(0)
+		if err != nil {
+			log.Println(err)
+		}
+		m.selected = node.GetVal().(*kanban.Project)
 		return
 	}
 }

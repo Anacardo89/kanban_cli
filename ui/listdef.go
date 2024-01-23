@@ -16,7 +16,7 @@ func (i menuItem) Description() string { return i.description }
 func (i menuItem) FilterValue() string { return i.title }
 
 func (m *Menu) SetupList() {
-	l := list.New([]list.Item{}, list.NewDefaultDelegate(), m.witdh/3, m.height-9)
+	l := list.New([]list.Item{}, list.NewDefaultDelegate(), ws.width/3, ws.height-9)
 	l.SetShowHelp(false)
 	l.Title = "Projects"
 	l.InfiniteScrolling = true
