@@ -13,9 +13,9 @@ func (m *Menu) ToStorage() *storage.Menu {
 
 func (m *Menu) projectsToStorage() []storage.Project {
 	projects := []storage.Project{}
-	for i := 0; i < m.Projects.GetLength(); i++ {
+	for i := 0; i < m.Projects.Length(); i++ {
 		projectNode, _ := m.Projects.WalkTo(i)
-		projectVal := projectNode.GetVal().(*Project)
+		projectVal := projectNode.Val().(*Project)
 		project := storage.Project{
 			Title:  projectVal.Title,
 			Boards: projectVal.boardsToStorage(),
@@ -28,9 +28,9 @@ func (m *Menu) projectsToStorage() []storage.Project {
 
 func (p *Project) boardsToStorage() []storage.Board {
 	boards := []storage.Board{}
-	for i := 0; i < p.Boards.GetLength(); i++ {
+	for i := 0; i < p.Boards.Length(); i++ {
 		boardNode, _ := p.Boards.WalkTo(i)
-		boardVal := boardNode.GetVal().(*Board)
+		boardVal := boardNode.Val().(*Board)
 		board := storage.Board{
 			Title: boardVal.Title,
 			Cards: boardVal.cardsToStorage(),
@@ -42,9 +42,9 @@ func (p *Project) boardsToStorage() []storage.Board {
 
 func (p *Project) labelsToStorage() []storage.Label {
 	labels := []storage.Label{}
-	for i := 0; i < p.Labels.GetLength(); i++ {
+	for i := 0; i < p.Labels.Length(); i++ {
 		labelNode, _ := p.Labels.WalkTo(i)
-		labelVal := labelNode.GetVal().(*Label)
+		labelVal := labelNode.Val().(*Label)
 		label := storage.Label{
 			Title: labelVal.Title,
 			Color: labelVal.Color,
@@ -56,9 +56,9 @@ func (p *Project) labelsToStorage() []storage.Label {
 
 func (b *Board) cardsToStorage() []storage.Card {
 	cards := []storage.Card{}
-	for i := 0; i < b.Cards.GetLength(); i++ {
+	for i := 0; i < b.Cards.Length(); i++ {
 		cardNode, _ := b.Cards.WalkTo(i)
-		cardVal := cardNode.GetVal().(*Card)
+		cardVal := cardNode.Val().(*Card)
 		card := storage.Card{
 			Title:       cardVal.Title,
 			Description: cardVal.Description,
@@ -72,9 +72,9 @@ func (b *Board) cardsToStorage() []storage.Card {
 
 func (c *Card) checkListToStorage() []storage.CheckItem {
 	checkList := []storage.CheckItem{}
-	for i := 0; i < c.CheckList.GetLength(); i++ {
+	for i := 0; i < c.CheckList.Length(); i++ {
 		checkNode, _ := c.CheckList.WalkTo(i)
-		checkVal := checkNode.GetVal().(*CheckItem)
+		checkVal := checkNode.Val().(*CheckItem)
 		checkItem := storage.CheckItem{
 			Title: checkVal.Title,
 			Check: checkVal.Check,
@@ -86,9 +86,9 @@ func (c *Card) checkListToStorage() []storage.CheckItem {
 
 func (c *Card) cardLabelsToStorage() []storage.Label {
 	cardLabels := []storage.Label{}
-	for i := 0; i < c.CardLabels.GetLength(); i++ {
+	for i := 0; i < c.CardLabels.Length(); i++ {
 		cardLabelNode, _ := c.CardLabels.WalkTo(i)
-		cardLabelVal := cardLabelNode.GetVal().(*Label)
+		cardLabelVal := cardLabelNode.Val().(*Label)
 		cardLabel := storage.Label{
 			Title: cardLabelVal.Title,
 			Color: cardLabelVal.Color,

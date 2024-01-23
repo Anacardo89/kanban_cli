@@ -1,5 +1,5 @@
-github.com/Anacardo89/ds v0.0.0-20240110150413-32b337e8beaf h1:bHc1fZ8IYKCs6NDiFQvaMlzEk01DPmH+YWVQl8guw8I=
-github.com/Anacardo89/ds v0.0.0-20240110150413-32b337e8beaf/go.mod h1:h1r6uMSxkPtaFjETFHBC9COZCHDbd8t4iU9dcnRM980=
+github.com/Anacardo89/ds v0.0.0-20240123071052-4710299dc239 h1:cLtWLu1MLkT2+aYw8MpfnwTd91/W+BK1jkYaaqvpxkw=
+github.com/Anacardo89/ds v0.0.0-20240123071052-4710299dc239/go.mod h1:h1r6uMSxkPtaFjETFHBC9COZCHDbd8t4iU9dcnRM980=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
