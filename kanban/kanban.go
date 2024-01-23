@@ -58,6 +58,7 @@ func (m *Menu) AddProject(title string) {
 	project := &Project{
 		Title:  title,
 		Boards: dll.New(),
+		Labels: dll.New(),
 	}
 	m.Projects.Append(project)
 }
