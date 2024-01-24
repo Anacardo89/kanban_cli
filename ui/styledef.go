@@ -10,6 +10,7 @@ const (
 	input
 	listStyle
 	selected
+	title
 )
 
 var (
@@ -58,7 +59,6 @@ func (p Project) SetStyles() {
 		BorderForeground(DefaultBorderColor).
 		BorderStyle(lipgloss.RoundedBorder()).
 		Align(lipgloss.Center).
-		MarginTop(1).
 		Padding(1, 3).
 		Bold(true)
 	p.styles[input] = lipgloss.NewStyle().
@@ -70,13 +70,17 @@ func (p Project) SetStyles() {
 	p.styles[listStyle] = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
 		BorderStyle(lipgloss.RoundedBorder()).
-		Margin(1, 1, 0).
+		Margin(0, 1, 1).
 		Padding(1).
 		Bold(true)
 	p.styles[selected] = lipgloss.NewStyle().
 		BorderForeground(SelectedColor).
 		BorderStyle(lipgloss.RoundedBorder()).
-		Margin(1, 1, 0).
+		Margin(0, 1, 1).
 		Padding(1).
+		Bold(true)
+	p.styles[title] = lipgloss.NewStyle().
+		Align(lipgloss.Center).
+		MarginLeft(2).
 		Bold(true)
 }

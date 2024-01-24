@@ -22,7 +22,7 @@ type Menu struct {
 
 func NewMenu() Menu {
 	return Menu{
-		styles: make([]lipgloss.Style, 5),
+		styles: make([]lipgloss.Style, 10),
 		cursor: 0,
 		menu:   kanban.StartMenu(),
 		Input:  InputField{field: textinput.New()},

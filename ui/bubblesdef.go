@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"log"
-
 	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
@@ -38,25 +36,24 @@ func (m *Menu) SetupList() {
 
 func (p *Project) SetupBoards() {
 	var (
-		err    error
 		boards []list.Model
 		node   *dll.Node
 	)
-	node, err = p.project.Boards.HeadNode()
-	if err != nil {
-		log.Println(err)
+	node, _ = p.project.Boards.HeadNode()
+	if node == nil {
+		return
 	}
+	board := node.Val().(*kanban.Board)
 	for i := 0; i < p.project.Boards.Length(); i++ {
 		b := list.New([]list.Item{}, list.NewDefaultDelegate(), ws.width/3, ws.height-9)
 		b.SetShowHelp(false)
-		board := node.Val().(*kanban.Board)
 		b.Title = board.Title
 		b.InfiniteScrolling = true
-		node, err = node.Next()
-		if err != nil {
-			log.Println(err)
-		}
 		boards = append(boards, b)
+		node, _ = node.Next()
+		if node != nil {
+			board = node.Val().(*kanban.Board)
+		}
 	}
 	p.boards = boards
 }
