@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Executable
+kanban_cli
+
 # Log files
 *.log
 
