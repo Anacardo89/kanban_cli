@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"log"
+
 	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
@@ -36,8 +38,11 @@ func (m *Menu) SetupList() {
 
 func (p *Project) SetupBoards() {
 	var (
-		boards []list.Model
-		node   *dll.Node
+		err      error
+		boards   []list.Model
+		node     *dll.Node
+		cardNode *dll.Node
+		items    []list.Item
 	)
 	node, _ = p.project.Boards.HeadNode()
 	if node == nil {
@@ -49,6 +54,19 @@ func (p *Project) SetupBoards() {
 		b.SetShowHelp(false)
 		b.Title = board.Title
 		b.InfiniteScrolling = true
+		for j := 0; j < board.Cards.Length(); j++ {
+			cardNode, err = board.Cards.WalkTo(j)
+			if err != nil {
+				log.Println(err)
+			}
+			c := cardNode.Val().(*kanban.Card)
+			item := Item{
+				title: c.Title,
+			}
+			items = append(items, item)
+			b.SetItems(items)
+		}
+		items = []list.Item{}
 		boards = append(boards, b)
 		node, _ = node.Next()
 		if node != nil {

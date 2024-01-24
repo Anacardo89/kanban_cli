@@ -11,6 +11,7 @@ const (
 	menu modelState = iota
 	project
 	card
+	label
 )
 
 type inputFlag string
@@ -35,13 +36,22 @@ type Model struct {
 	menu    Menu
 	project Project
 	sp      *kanban.Project
-	card    tea.Model
+	card    Card
+	sc      *kanban.Card
+	label   Label
 }
 
 func New() Model {
 	return Model{
 		state: menu,
 		menu:  NewMenu(),
+	}
+}
+
+func Test() Model {
+	return Model{
+		state: menu,
+		menu:  TestData(),
 	}
 }
 
@@ -60,12 +70,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.menu = updatedMenu.(Menu)
 		return m, cmd
 	case project:
-		if m.sp != m.menu.selected.Val().(*kanban.Project) {
-			m.sp = m.menu.selected.Val().(*kanban.Project)
+		if m.sp != m.menu.getProject() {
+			m.sp = m.menu.getProject()
 			m.project = OpenProject(m.sp)
+			m.label = OpenLabel(m.sp)
 		}
 		updatedProject, cmd := m.project.Update(msg)
 		m.project = updatedProject.(Project)
+		return m, cmd
+	case label:
+		updatedLabel, cmd := m.label.Update(msg)
+		m.label = updatedLabel.(Label)
+		return m, cmd
+	case card:
+		if m.sc != m.project.getCard() {
+			m.sc = m.project.getCard()
+			m.card = OpenCard(m.sc)
+		}
+		updatedCard, cmd := m.card.Update(msg)
+		m.card = updatedCard.(Card)
 		return m, cmd
 	}
 	return m, nil
@@ -77,6 +100,10 @@ func (m Model) View() string {
 		return m.menu.View()
 	case project:
 		return m.project.View()
+	case label:
+		return m.label.View()
+	case card:
+		return m.card.View()
 	}
 	return ""
 }

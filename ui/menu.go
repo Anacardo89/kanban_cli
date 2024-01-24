@@ -21,10 +21,19 @@ type Menu struct {
 }
 
 func NewMenu() Menu {
+	m := Menu{
+		styles: make([]lipgloss.Style, 10),
+		menu:   kanban.StartMenu(),
+		Input:  InputField{field: textinput.New()},
+	}
+	return m
+}
+
+func TestData() Menu {
 	return Menu{
 		styles: make([]lipgloss.Style, 10),
 		cursor: 0,
-		menu:   kanban.StartMenu(),
+		menu:   kanban.TestData(),
 		Input:  InputField{field: textinput.New()},
 	}
 }
@@ -34,6 +43,7 @@ func (m Menu) Init() tea.Cmd {
 }
 
 func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:

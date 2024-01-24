@@ -1,27 +1,26 @@
-package main
+package kanban
 
 import (
 	"log"
 
-	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/lipgloss"
 )
 
-func TestData() *kanban.Menu {
-	menu := kanban.StartMenu()
+func TestData() *Menu {
+	menu := StartMenu()
 	menu.AddProject("project1")
 	project1, err := menu.Projects.WalkTo(0)
 	if err != nil {
 		log.Println(err)
 	}
-	project1Val := project1.Val().(*kanban.Project)
+	project1Val := project1.Val().(*Project)
 	project1Val.AddBoard("Board 1")
 	menu.AddProject("project2")
 	project2, err := menu.Projects.WalkTo(1)
 	if err != nil {
 		log.Println(err)
 	}
-	project2Val := project2.Val().(*kanban.Project)
+	project2Val := project2.Val().(*Project)
 	project2Val.AddBoard("Board 1")
 	project1Val.AddBoard("Board 2")
 	project2Val.AddBoard("Board 2")
@@ -45,10 +44,10 @@ func TestData() *kanban.Menu {
 	if err != nil {
 		log.Println(err)
 	}
-	project1Board1Val := project1Board1.Val().(*kanban.Board)
-	project1Board2Val := project1Board2.Val().(*kanban.Board)
-	project2Board1Val := project2Board1.Val().(*kanban.Board)
-	project2Board2Val := project2Board2.Val().(*kanban.Board)
+	project1Board1Val := project1Board1.Val().(*Board)
+	project1Board2Val := project1Board2.Val().(*Board)
+	project2Board1Val := project2Board1.Val().(*Board)
+	project2Board2Val := project2Board2.Val().(*Board)
 	project1Board1Val.AddCard("Card 1")
 	project1Board1Val.AddCard("Card 2")
 	project1Board2Val.AddCard("Card 1")

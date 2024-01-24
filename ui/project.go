@@ -15,7 +15,6 @@ type Project struct {
 	styles    []lipgloss.Style
 	project   *kanban.Project
 	boards    []list.Model
-	labels    list.Model
 	hcursor   int
 	vcursor   int
 	sb        *dll.Node
@@ -25,12 +24,22 @@ type Project struct {
 }
 
 func OpenProject(kp *kanban.Project) Project {
+	var err error
 	p := Project{
 		styles:  make([]lipgloss.Style, 10),
-		hcursor: 0,
-		vcursor: 0,
 		Input:   InputField{field: textinput.New()},
 		project: kp,
+	}
+	p.sb, err = p.project.Boards.WalkTo(p.hcursor)
+	if err != nil {
+		log.Println(err)
+	}
+	if p.sb != (*dll.Node)(nil) {
+		board := p.sb.Val().(*kanban.Board)
+		p.sc, err = board.Cards.WalkTo(p.vcursor)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	p.SetStyles()
 	p.SetupBoards()
@@ -86,11 +95,17 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.setInput()
 			return p, p.Input.field.Focus()
 		case "a":
+			if p.project.Boards.Length() == 0 {
+				return p, nil
+			}
 			p.inputFlag = add
 			p.setInput()
 			return p, p.Input.field.Focus()
+		case "l":
+			return p, func() tea.Msg { return label }
+		case "esc":
+			return p, func() tea.Msg { return menu }
 		}
-
 	}
 	return p, nil
 }
@@ -260,6 +275,9 @@ func (p *Project) getCard() *kanban.Card {
 	if p.project.Boards.Length() == 0 {
 		return nil
 	}
+	if len(p.boards[p.hcursor].Items()) == 0 {
+		return nil
+	}
 	node, err := p.project.Boards.WalkTo(p.hcursor)
 	if err != nil {
 		log.Println(err)
@@ -306,13 +324,13 @@ func (p *Project) handleInput(key string) {
 			p.sb = node
 		case add:
 			board := p.sb.Val().(*kanban.Board)
+			board.AddCard(p.Input.data)
 			boardItems = p.boards[p.hcursor].Items()
 			boardItem := Item{
 				title: p.Input.data,
 			}
 			boardItems = append(boardItems, boardItem)
 			p.boards[p.hcursor].SetItems(boardItems)
-			board.AddCard(p.Input.data)
 			node, _ = board.Cards.HeadNode()
 			if err != nil {
 				log.Println(err)
