@@ -26,7 +26,7 @@ type Project struct {
 
 func OpenProject(kp *kanban.Project) Project {
 	p := Project{
-		styles:  make([]lipgloss.Style, 5),
+		styles:  make([]lipgloss.Style, 10),
 		hcursor: 0,
 		vcursor: 0,
 		Input:   InputField{field: textinput.New()},
@@ -99,6 +99,7 @@ func (p Project) View() string {
 	if ws.width == 0 {
 		return "loading..."
 	}
+	titleStyled := ""
 	emptyTxtStyled := ""
 	bottomLines := ""
 	inputStyled := ""
@@ -110,7 +111,7 @@ func (p Project) View() string {
 		emptyTxtStyled = p.styles[empty].Render(emptyTxt)
 		if p.Input.field.Focused() {
 			_, h := lipgloss.Size(emptyTxtStyled)
-			for i := 0; i < ws.height-h-h/2; i++ {
+			for i := 0; i < ws.height-h-h/2-1; i++ {
 				bottomLines += "\n"
 			}
 			inputStyled = p.styles[input].Render(p.Input.field.View())
@@ -122,13 +123,15 @@ func (p Project) View() string {
 			lipgloss.Top,
 			lipgloss.JoinVertical(
 				lipgloss.Center,
+				titleStyled,
 				emptyTxtStyled,
 				bottomLines,
 				inputStyled,
 			))
 		return output
 	}
-	for i, _ := range p.boards {
+	titleStyled = p.styles[title].Render(p.project.Title)
+	for i := range p.boards {
 		if i == p.hcursor {
 			boardStyled = p.styles[selected].Render(p.boards[i].View())
 		} else {
@@ -146,8 +149,8 @@ func (p Project) View() string {
 		lipgloss.Top,
 		lipgloss.JoinVertical(
 			lipgloss.Left,
+			titleStyled,
 			boardsStyled,
-			bottomLines,
 			inputStyled,
 		))
 	return output

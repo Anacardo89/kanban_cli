@@ -19,6 +19,8 @@ const (
 	new    inputFlag = "n"
 	add    inputFlag = "a"
 	rename inputFlag = "r"
+	move   inputFlag = "m"
+	delete inputFlag = "d"
 )
 
 type WindowSize struct {
