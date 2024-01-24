@@ -69,7 +69,6 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.setInput()
 			return m, m.Input.field.Focus()
 		}
-
 	}
 	return m, nil
 }
@@ -82,7 +81,7 @@ func (m Menu) View() string {
 		bottomLines    = ""
 		emptyTxtStyled = ""
 		inputStyled    = ""
-		menustyled     = ""
+		menuStyled     = ""
 		output         = ""
 	)
 
@@ -96,15 +95,35 @@ func (m Menu) View() string {
 			}
 			inputStyled = m.styles[input].Render(m.Input.field.View())
 		}
-		output = lipgloss.Place(ws.width, ws.height, lipgloss.Center, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Center, emptyTxtStyled, bottomLines, inputStyled))
+		output = lipgloss.Place(
+			ws.width,
+			ws.height,
+			lipgloss.Center,
+			lipgloss.Top,
+			lipgloss.JoinVertical(
+				lipgloss.Center,
+				emptyTxtStyled,
+				bottomLines,
+				inputStyled,
+			))
 		return output
 	}
 
-	menustyled = m.styles[listStyle].Render(m.list.View())
+	menuStyled = m.styles[listStyle].Render(m.list.View())
 	if m.Input.field.Focused() {
 		inputStyled = m.styles[input].Render(m.Input.field.View())
 	}
-	output = lipgloss.Place(ws.width, ws.height, lipgloss.Left, lipgloss.Top, lipgloss.JoinVertical(lipgloss.Left, menustyled, bottomLines, inputStyled))
+	output = lipgloss.Place(
+		ws.width,
+		ws.height,
+		lipgloss.Left,
+		lipgloss.Top,
+		lipgloss.JoinVertical(
+			lipgloss.Left,
+			menuStyled,
+			bottomLines,
+			inputStyled,
+		))
 	return output
 }
 
@@ -146,7 +165,7 @@ func (m *Menu) handleMoveDown() {
 		return
 	}
 	m.cursor++
-	m.selected, err = m.selected.Prev()
+	m.selected, err = m.selected.Next()
 	if err != nil {
 		log.Println(err)
 	}
@@ -177,15 +196,15 @@ func (m *Menu) handleInput(key string) {
 		m.Input.field.Blur()
 		return
 	case "enter":
-		log.Println(m.Input.field.Value())
 		m.Input.data = m.Input.field.Value()
-		menuItem := menuItem{
+		menuItem := Item{
 			title: m.Input.data,
 		}
 		menuItems = append(menuItems, menuItem)
 		m.list.SetItems(menuItems)
 		m.menu.AddProject(m.Input.data)
 		m.Input.data = ""
+		m.Input.field.SetValue("")
 		m.Input.field.Blur()
 		m.cursor = 0
 		node, err := m.menu.Projects.HeadNode()
