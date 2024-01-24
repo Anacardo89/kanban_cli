@@ -59,6 +59,14 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return p, tea.Quit
+		case "up":
+			p.handleMoveUp()
+			p.boards[p.hcursor], cmd = p.boards[p.hcursor].Update(msg)
+			return p, cmd
+		case "down":
+			p.handleMoveDown()
+			p.boards[p.hcursor], cmd = p.boards[p.hcursor].Update(msg)
+			return p, cmd
 		case "right":
 			p.handleMoveRight()
 			p.boards[p.hcursor], cmd = p.boards[p.hcursor].Update(msg)
@@ -197,7 +205,6 @@ func (p *Project) handleMoveLeft() {
 	}
 	var err error
 	var node *dll.Node
-	p.vcursor = 0
 	if p.hcursor == 0 {
 		p.hcursor = p.project.Boards.Length() - 1
 		node, err = p.project.Boards.TailNode()
@@ -212,6 +219,11 @@ func (p *Project) handleMoveLeft() {
 	if err != nil {
 		log.Println(err)
 	}
+	p.vcursor = p.boards[p.hcursor].Cursor()
+	p.sc, err = p.project.Boards.WalkTo(p.vcursor)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (p *Project) handleMoveRight() {
@@ -220,7 +232,6 @@ func (p *Project) handleMoveRight() {
 	}
 	var err error
 	var node *dll.Node
-	p.vcursor = 0
 	if p.hcursor == p.project.Boards.Length()-1 {
 		p.hcursor = 0
 		node, err = p.project.Boards.HeadNode()
@@ -232,6 +243,11 @@ func (p *Project) handleMoveRight() {
 	}
 	p.hcursor++
 	p.sb, err = p.sb.Next()
+	if err != nil {
+		log.Println(err)
+	}
+	p.vcursor = p.boards[p.hcursor].Cursor()
+	p.sc, err = p.project.Boards.WalkTo(p.vcursor)
 	if err != nil {
 		log.Println(err)
 	}
@@ -256,7 +272,12 @@ func (p *Project) getCard() *kanban.Card {
 func (p *Project) setInput() {
 	p.Input.field.Prompt = ": "
 	p.Input.field.CharLimit = 120
-	p.Input.field.Placeholder = "Board Title"
+	switch p.inputFlag {
+	case new:
+		p.Input.field.Placeholder = "Board Title"
+	case add:
+		p.Input.field.Placeholder = "Card Title"
+	}
 }
 
 func (p *Project) handleInput(key string) {
@@ -270,13 +291,17 @@ func (p *Project) handleInput(key string) {
 		return
 	case "enter":
 		p.Input.data = p.Input.field.Value()
-		if p.inputFlag == new {
+		switch p.inputFlag {
+		case new:
 			p.project.AddBoard(p.Input.data)
 			p.SetupBoards()
-			p.boards[p.hcursor].Title = p.Input.data
 			p.hcursor = 0
-		}
-		if p.inputFlag == add {
+			node, err = p.project.Boards.HeadNode()
+			if err != nil {
+				log.Println(err)
+			}
+			p.sb = node
+		case add:
 			board := p.sb.Val().(*kanban.Board)
 			boardItems = p.boards[p.hcursor].Items()
 			boardItem := Item{
@@ -285,7 +310,7 @@ func (p *Project) handleInput(key string) {
 			boardItems = append(boardItems, boardItem)
 			p.boards[p.hcursor].SetItems(boardItems)
 			board.AddCard(p.Input.data)
-			node, err = board.Cards.HeadNode()
+			node, _ = board.Cards.HeadNode()
 			if err != nil {
 				log.Println(err)
 			}
@@ -295,11 +320,6 @@ func (p *Project) handleInput(key string) {
 		p.Input.field.SetValue("")
 		p.Input.field.Blur()
 		p.vcursor = 0
-		node, err = p.project.Boards.HeadNode()
-		if err != nil {
-			log.Println(err)
-		}
-		p.sb = node
 		return
 	}
 }
