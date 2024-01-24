@@ -19,9 +19,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-// func main() {
-// 	menu := TestData()
-// 	sm := menu.ToStorage()
-// 	fmt.Println(sm.ToYAML())
-// }
