@@ -9,10 +9,12 @@ const (
 	empty
 	input
 	listStyle
+	selected
 )
 
 var (
 	DefaultBorderColor = lipgloss.Color("#fc5603")
+	SelectedColor      = lipgloss.Color("#fff5e1")
 )
 
 func (m Menu) SetStyles() {
@@ -67,6 +69,12 @@ func (p Project) SetStyles() {
 		Bold(true)
 	p.styles[listStyle] = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
+		BorderStyle(lipgloss.RoundedBorder()).
+		Margin(1, 1, 0).
+		Padding(1).
+		Bold(true)
+	p.styles[selected] = lipgloss.NewStyle().
+		BorderForeground(SelectedColor).
 		BorderStyle(lipgloss.RoundedBorder()).
 		Margin(1, 1, 0).
 		Padding(1).
