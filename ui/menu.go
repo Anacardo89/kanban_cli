@@ -12,12 +12,12 @@ import (
 )
 
 type Menu struct {
-	styles   []lipgloss.Style
-	menu     *kanban.Menu
-	cursor   int
-	selected *dll.Node
-	list     list.Model
-	Input    InputField
+	styles []lipgloss.Style
+	menu   *kanban.Menu
+	sp     *dll.Node
+	cursor int
+	list   list.Model
+	Input  InputField
 }
 
 func NewMenu() Menu {
@@ -50,7 +50,7 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		ws.width = msg.Width
 		ws.height = msg.Height
 		m.SetStyles()
-		m.SetupList()
+		m.SetupMenuList()
 		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {
@@ -78,6 +78,13 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "n":
 			m.setInput()
 			return m, m.Input.field.Focus()
+		case "d":
+			p := m.getProject()
+			if p == nil {
+				return m, nil
+			}
+			m.deleteProject()
+			return m, nil
 		}
 	}
 	return m, nil
@@ -137,50 +144,6 @@ func (m Menu) View() string {
 	return output
 }
 
-func (m *Menu) handleMoveUp() {
-	if m.menu.Projects.Length() == 0 {
-		return
-	}
-	var err error
-	var node *dll.Node
-	if m.cursor == 0 {
-		m.cursor = m.menu.Projects.Length() - 1
-		node, err = m.menu.Projects.TailNode()
-		if err != nil {
-			log.Println(err)
-		}
-		m.selected = node
-		return
-	}
-	m.cursor--
-	m.selected, err = m.selected.Prev()
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func (m *Menu) handleMoveDown() {
-	if m.menu.Projects.Length() == 0 {
-		return
-	}
-	var err error
-	var node *dll.Node
-	if m.cursor == m.menu.Projects.Length()-1 {
-		m.cursor = 0
-		node, err = m.menu.Projects.HeadNode()
-		if err != nil {
-			log.Println(err)
-		}
-		m.selected = node
-		return
-	}
-	m.cursor++
-	m.selected, err = m.selected.Next()
-	if err != nil {
-		log.Println(err)
-	}
-}
-
 func (m *Menu) getProject() *kanban.Project {
 	if m.menu.Projects.Length() == 0 {
 		return nil
@@ -190,6 +153,59 @@ func (m *Menu) getProject() *kanban.Project {
 		log.Println(err)
 	}
 	return node.Val().(*kanban.Project)
+}
+
+func (m *Menu) deleteProject() {
+	var err error
+	if m.menu.Projects.Length() == 0 {
+		return
+	}
+	p := m.sp.Val().(*kanban.Project)
+	err = m.menu.RemoveProject(p)
+	if err != nil {
+		log.Println(err)
+	}
+	m.SetupMenuList()
+}
+
+func (m *Menu) handleMoveUp() {
+	var err error
+	if m.menu.Projects.Length() == 0 {
+		return
+	}
+	if m.cursor == 0 {
+		m.cursor = m.menu.Projects.Length() - 1
+		m.sp, err = m.menu.Projects.TailNode()
+		if err != nil {
+			log.Println(err)
+		}
+		return
+	}
+	m.cursor--
+	m.sp, err = m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func (m *Menu) handleMoveDown() {
+	var err error
+	if m.menu.Projects.Length() == 0 {
+		return
+	}
+	if m.cursor == m.menu.Projects.Length()-1 {
+		m.cursor = 0
+		m.sp, err = m.menu.Projects.HeadNode()
+		if err != nil {
+			log.Println(err)
+		}
+		return
+	}
+	m.cursor++
+	m.sp, err = m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (m *Menu) setInput() {
@@ -217,11 +233,6 @@ func (m *Menu) handleInput(key string) {
 		m.Input.field.SetValue("")
 		m.Input.field.Blur()
 		m.cursor = 0
-		node, err := m.menu.Projects.HeadNode()
-		if err != nil {
-			log.Println(err)
-		}
-		m.selected = node
 		return
 	}
 }

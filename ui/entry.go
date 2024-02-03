@@ -17,6 +17,7 @@ const (
 type inputFlag string
 
 const (
+	none   inputFlag = "none"
 	new    inputFlag = "n"
 	add    inputFlag = "a"
 	rename inputFlag = "r"

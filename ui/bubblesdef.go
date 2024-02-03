@@ -28,11 +28,24 @@ func (i Item) Title() string       { return i.title }
 func (i Item) Description() string { return i.description }
 func (i Item) FilterValue() string { return i.title }
 
-func (m *Menu) SetupList() {
+func (m *Menu) SetupMenuList() {
+	var (
+		node  *dll.Node
+		items []list.Item
+	)
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), ws.width/3, ws.height-9)
 	l.SetShowHelp(false)
 	l.Title = "Projects"
 	l.InfiniteScrolling = true
+	for i := 0; i < m.menu.Projects.Length(); i++ {
+		node, _ = m.menu.Projects.WalkTo(i)
+		project := node.Val().(*kanban.Project)
+		item := Item{
+			title: project.Title,
+		}
+		items = append(items, item)
+	}
+	l.SetItems(items)
 	m.list = l
 }
 

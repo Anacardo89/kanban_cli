@@ -65,6 +65,10 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.Input.field, cmd = p.Input.field.Update(msg)
 			return p, cmd
 		}
+		if p.inputFlag == delete {
+			p.handleDelete(msg.String())
+			return p, nil
+		}
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return p, tea.Quit
@@ -101,6 +105,9 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.inputFlag = add
 			p.setInput()
 			return p, p.Input.field.Focus()
+		case "d":
+			p.inputFlag = delete
+			return p, nil
 		case "l":
 			return p, func() tea.Msg { return label }
 		case "esc":
@@ -171,6 +178,53 @@ func (p Project) View() string {
 	return output
 }
 
+func (p *Project) getCard() *kanban.Card {
+	if p.project.Boards.Length() == 0 {
+		return nil
+	}
+	if len(p.boards[p.hcursor].Items()) == 0 {
+		return nil
+	}
+	node, err := p.project.Boards.WalkTo(p.hcursor)
+	if err != nil {
+		log.Println(err)
+	}
+	board := node.Val().(*kanban.Board)
+	node, err = board.Cards.WalkTo(p.vcursor)
+	if err != nil {
+		log.Println(err)
+	}
+	p.sc = node
+	return node.Val().(*kanban.Card)
+}
+
+func (p *Project) deleteBoard() {
+	var err error
+	if p.project.Boards.Length() == 0 {
+		return
+	}
+	b := p.sb.Val().(*kanban.Board)
+	err = p.project.RemoveBoard(b)
+	if err != nil {
+		log.Println(err)
+	}
+	p.SetupBoards()
+}
+
+func (p *Project) deleteCard() {
+	var err error
+	board := p.sb.Val().(*kanban.Board)
+	if board.Cards.Length() == 0 {
+		return
+	}
+	c := p.sc.Val().(*kanban.Card)
+	err = board.RemoveCard(c)
+	if err != nil {
+		log.Println(err)
+	}
+	p.SetupBoards()
+}
+
 func (p *Project) handleMoveUp() {
 	board := p.sb.Val().(*kanban.Board)
 	if board.Cards.Length() == 0 {
@@ -238,7 +292,8 @@ func (p *Project) handleMoveLeft() {
 		log.Println(err)
 	}
 	p.vcursor = p.boards[p.hcursor].Cursor()
-	p.sc, err = p.project.Boards.WalkTo(p.vcursor)
+	board := p.sb.Val().(*kanban.Board)
+	p.sc, err = board.Cards.WalkTo(p.vcursor)
 	if err != nil {
 		log.Println(err)
 	}
@@ -265,29 +320,11 @@ func (p *Project) handleMoveRight() {
 		log.Println(err)
 	}
 	p.vcursor = p.boards[p.hcursor].Cursor()
-	p.sc, err = p.project.Boards.WalkTo(p.vcursor)
+	board := p.sb.Val().(*kanban.Board)
+	p.sc, err = board.Cards.WalkTo(p.vcursor)
 	if err != nil {
 		log.Println(err)
 	}
-}
-
-func (p *Project) getCard() *kanban.Card {
-	if p.project.Boards.Length() == 0 {
-		return nil
-	}
-	if len(p.boards[p.hcursor].Items()) == 0 {
-		return nil
-	}
-	node, err := p.project.Boards.WalkTo(p.hcursor)
-	if err != nil {
-		log.Println(err)
-	}
-	board := node.Val().(*kanban.Board)
-	node, err = board.Cards.WalkTo(p.vcursor)
-	if err != nil {
-		log.Println(err)
-	}
-	return node.Val().(*kanban.Card)
 }
 
 func (p *Project) setInput() {
@@ -298,6 +335,17 @@ func (p *Project) setInput() {
 		p.Input.field.Placeholder = "Board Title"
 	case add:
 		p.Input.field.Placeholder = "Card Title"
+	}
+}
+
+func (p *Project) handleDelete(key string) {
+	switch key {
+	case "b":
+		p.deleteBoard()
+		p.inputFlag = none
+	case "c":
+		p.deleteCard()
+		p.inputFlag = none
 	}
 }
 
