@@ -8,8 +8,11 @@
 *.so
 *.dylib
 
+# vscode config
+/.vscode
+
 # Executable
-kanban_cli
+/kanban_cli
 
 # Log files
 *.log

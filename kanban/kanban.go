@@ -63,7 +63,7 @@ func (m *Menu) AddProject(title string) {
 	m.Projects.Append(project)
 }
 
-func (m *Menu) RemoveProject(project dll.DLL) error {
+func (m *Menu) RemoveProject(project *Project) error {
 	_, err := m.Projects.Remove(project)
 	return err
 }
@@ -81,7 +81,7 @@ func (p *Project) AddBoard(title string) {
 	p.Boards.Append(board)
 }
 
-func (p *Project) RemoveBoard(board dll.DLL) error {
+func (p *Project) RemoveBoard(board *Board) error {
 	_, err := p.Boards.Remove(board)
 	return err
 }
@@ -94,7 +94,7 @@ func (p *Project) AddLabel(title string, color lipgloss.Color) {
 	p.Labels.Append(label)
 }
 
-func (p *Project) RemoveLabel(label dll.DLL) error {
+func (p *Project) RemoveLabel(label *Label) error {
 	_, err := p.Labels.Remove(label)
 	return err
 }
@@ -122,7 +122,7 @@ func (b *Board) AddCard(title string) {
 	b.Cards.Append(card)
 }
 
-func (b *Board) RemoveCard(card dll.DLL) error {
+func (b *Board) RemoveCard(card *Card) error {
 	_, err := b.Cards.Remove(card)
 	return err
 }
@@ -144,7 +144,7 @@ func (c *Card) AddCheckItem(title string) {
 	c.CheckList.Append(checkItem)
 }
 
-func (c *Card) RemoveCheckItem(checkItem dll.DLL) error {
+func (c *Card) RemoveCheckItem(checkItem *CheckItem) error {
 	_, err := c.CheckList.Remove(checkItem)
 	return err
 }
