@@ -101,6 +101,52 @@ func (p *Project) handleInput(key string) {
 	}
 }
 
+// Label
+func (l *Label) setInput() {
+	l.Input.field.Prompt = ": "
+	l.Input.field.CharLimit = 120
+	l.Input.field.Placeholder = "Label Ttile"
+}
+
+func (l *Label) handleInput(key string) {
+	switch key {
+	case "esc":
+		l.Input.field.SetValue("")
+		l.Input.data = ""
+		l.Input.field.Blur()
+		return
+	case "enter":
+		if labelName == "" {
+			l.Input.data = l.Input.field.Value()
+			if l.Input.data == "" {
+				return
+			}
+			labelName = l.Input.data
+			l.Input.data = ""
+			l.Input.field.SetValue("")
+			l.Input.field.Placeholder = "Label Hex Color"
+			return
+		}
+		l.Input.data = l.Input.field.Value()
+		if l.Input.data[0] != '#' {
+			l.Input.data = string('#') + l.Input.data
+		}
+		if len(l.Input.data) != 7 {
+			return
+		}
+		l.project.AddLabel(labelName, lipgloss.Color(l.Input.data))
+		labelItem := Item{
+			title: l.Input.data,
+		}
+		labelItems = append(labelItems, labelItem)
+		l.list.SetItems(labelItems)
+		l.setupList()
+		l.Input.data = ""
+		l.Input.field.SetValue("")
+		l.Input.field.Blur()
+	}
+}
+
 // List
 // Implement list.Item interface
 type Item struct {
@@ -112,26 +158,65 @@ func (i Item) Title() string       { return i.title }
 func (i Item) Description() string { return i.description }
 func (i Item) FilterValue() string { return i.title }
 
-// Menu
+// Define item delegates
 var (
-	menuItems    []list.Item
-	menuDelegate list.DefaultDelegate
+	NoDescDelegate   list.DefaultDelegate
+	DescDelegate     list.DefaultDelegate
+	LabelDelegate    list.DefaultDelegate
+	TopWhiteDelegate list.DefaultDelegate
 )
 
 func setMenuItemDelegate() {
-
-	menuDelegate = list.NewDefaultDelegate()
-	menuDelegate.ShowDescription = false
-	menuDelegate.Styles.NormalTitle.Foreground(ListItemColor)
-	menuDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).Border(lipgloss.HiddenBorder(), false, false, false, true)
+	NoDescDelegate = list.NewDefaultDelegate()
+	NoDescDelegate.ShowDescription = false
+	NoDescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	NoDescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
+		Border(lipgloss.HiddenBorder(), false, false, false, true)
 }
 
-func (m *Menu) setupMenuList() {
+func setBoardItemDelegate() {
+	DescDelegate = list.NewDefaultDelegate()
+	DescDelegate.ShowDescription = true
+	DescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	DescDelegate.Styles.NormalDesc = DescDelegate.Styles.NormalTitle.Copy()
+	DescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
+		Border(lipgloss.HiddenBorder(), false, false, false, true)
+	DescDelegate.Styles.SelectedDesc = DescDelegate.Styles.SelectedTitle.Copy()
+}
+
+func setLabelItemDelegate() {
+	LabelDelegate = list.NewDefaultDelegate()
+	LabelDelegate.ShowDescription = true
+	LabelDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	LabelDelegate.Styles.NormalDesc = LabelDelegate.Styles.NormalTitle.Copy()
+	LabelDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
+		Border(lipgloss.HiddenBorder(), false, false, false, true)
+	LabelDelegate.Styles.SelectedDesc = LabelDelegate.Styles.SelectedTitle.Copy()
+}
+
+func setMoveDelegate() {
+	TopWhiteDelegate = list.NewDefaultDelegate()
+	TopWhiteDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	TopWhiteDelegate.Styles.SelectedTitle.
+		Foreground(SelectedListItemColor).
+		BorderLeft(false).
+		BorderTop(true).
+		BorderForeground(WHITE)
+	TopWhiteDelegate.Styles.SelectedDesc = TopWhiteDelegate.Styles.SelectedTitle.Copy().
+		BorderTop(false)
+}
+
+// Menu
+var (
+	menuItems []list.Item
+)
+
+func (m *Menu) setupList() {
 	var (
 		node  *dll.Node
 		items []list.Item
 	)
-	l := list.New([]list.Item{}, menuDelegate, ws.width/3, ws.height-9)
+	l := list.New([]list.Item{}, NoDescDelegate, ws.width/3, ws.height-9)
 	l.SetShowHelp(false)
 	l.Title = "Projects"
 	l.InfiniteScrolling = true
@@ -148,31 +233,7 @@ func (m *Menu) setupMenuList() {
 }
 
 // Project
-var (
-	boardItems    []list.Item
-	boardDelegate list.DefaultDelegate
-	moveDelegate  list.DefaultDelegate
-)
-
-func setBoardItemDelegate() {
-	boardDelegate = list.NewDefaultDelegate()
-	boardDelegate.ShowDescription = true
-	boardDelegate.Styles.NormalTitle.Foreground(ListItemColor)
-	boardDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).Border(lipgloss.HiddenBorder(), false, false, false, true)
-	boardDelegate.Styles.SelectedDesc = boardDelegate.Styles.SelectedTitle.Copy()
-}
-
-func setMoveDelegate() {
-	moveDelegate = list.NewDefaultDelegate()
-	moveDelegate.Styles.NormalTitle.Foreground(ListItemColor)
-	moveDelegate.Styles.SelectedTitle.
-		Foreground(SelectedListItemColor).
-		BorderLeft(false).
-		BorderTop(true).
-		BorderForeground(MoveBarColor)
-	moveDelegate.Styles.SelectedDesc = boardDelegate.Styles.SelectedTitle.Copy().
-		BorderTop(false)
-}
+var boardItems []list.Item
 
 func (p *Project) setupBoards() {
 	var (
@@ -188,7 +249,7 @@ func (p *Project) setupBoards() {
 	}
 	board := node.Val().(*kanban.Board)
 	for i := 0; i < p.project.Boards.Length(); i++ {
-		b := list.New([]list.Item{}, boardDelegate, ws.width/3, ws.height-9)
+		b := list.New([]list.Item{}, DescDelegate, ws.width/3, ws.height-9)
 		b.SetShowHelp(false)
 		b.Title = board.Title
 		b.InfiniteScrolling = true
@@ -212,4 +273,31 @@ func (p *Project) setupBoards() {
 		}
 	}
 	p.boards = boards
+}
+
+// List
+var labelItems []list.Item
+
+func (l *Label) setupList() {
+	var (
+		node  *dll.Node
+		items []list.Item
+	)
+	lst := list.New([]list.Item{}, LabelDelegate, ws.width/3, ws.height-9)
+	lst.SetShowHelp(false)
+	lst.Title = "Labels"
+	lst.InfiniteScrolling = true
+	for i := 0; i < l.project.Labels.Length(); i++ {
+		node, _ = l.project.Labels.WalkTo(i)
+		label := node.Val().(*kanban.Label)
+		item := Item{
+			title: label.Title,
+		}
+		LabelDelegate.Styles.NormalDesc.Background(label.Color)
+		LabelDelegate.Styles.SelectedDesc.Background(label.Color)
+		labelItems = append(labelItems, item)
+	}
+	lst.SetItems(items)
+	l.list = lst
+	l.cursor = l.list.Cursor()
 }

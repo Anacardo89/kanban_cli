@@ -69,7 +69,7 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if p.inputFlag == move {
 				p.handleMove()
-				p.boards[p.hcursor].SetDelegate(boardDelegate)
+				p.boards[p.hcursor].SetDelegate(DescDelegate)
 				return p, nil
 			}
 			c := p.getCard()
@@ -94,13 +94,13 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "m":
 			p.inputFlag = move
 			p.moveFrom = []int{p.hcursor, p.vcursor}
-			p.boards[p.hcursor].SetDelegate(moveDelegate)
+			p.boards[p.hcursor].SetDelegate(TopWhiteDelegate)
 			return p, nil
 		case "l":
 			return p, func() tea.Msg { return label }
 		case "esc":
 			if p.inputFlag == move {
-				p.boards[p.hcursor].SetDelegate(boardDelegate)
+				p.boards[p.hcursor].SetDelegate(DescDelegate)
 				p.inputFlag = none
 				return p, nil
 			}
@@ -181,7 +181,7 @@ func (p *Project) handleMoveLeft() {
 		return
 	}
 	if p.inputFlag == move {
-		p.boards[p.hcursor].SetDelegate(boardDelegate)
+		p.boards[p.hcursor].SetDelegate(DescDelegate)
 	}
 	if p.hcursor == 0 {
 		p.hcursor = p.project.Boards.Length() - 1
@@ -190,7 +190,7 @@ func (p *Project) handleMoveLeft() {
 	}
 	p.vcursor = p.boards[p.hcursor].Cursor()
 	if p.inputFlag == move {
-		p.boards[p.hcursor].SetDelegate(moveDelegate)
+		p.boards[p.hcursor].SetDelegate(TopWhiteDelegate)
 	}
 }
 
@@ -199,7 +199,7 @@ func (p *Project) handleMoveRight() {
 		return
 	}
 	if p.inputFlag == move {
-		p.boards[p.hcursor].SetDelegate(boardDelegate)
+		p.boards[p.hcursor].SetDelegate(DescDelegate)
 	}
 	if p.hcursor == p.project.Boards.Length()-1 {
 		p.hcursor = 0
@@ -208,7 +208,7 @@ func (p *Project) handleMoveRight() {
 	}
 	p.vcursor = p.boards[p.hcursor].Cursor()
 	if p.inputFlag == move {
-		p.boards[p.hcursor].SetDelegate(moveDelegate)
+		p.boards[p.hcursor].SetDelegate(TopWhiteDelegate)
 	}
 }
 
@@ -285,7 +285,6 @@ func (p *Project) handleDelete(key string) {
 }
 
 func (p *Project) handleMove() {
-	log.Println(p.moveFrom)
 	var (
 		node *dll.Node
 		err  error

@@ -69,7 +69,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.sp != m.menu.getProject() {
 			m.sp = m.menu.getProject()
 			m.project = OpenProject(m.sp)
-			m.label = OpenLabel(m.sp)
+			m.label = OpenLabels(m.sp)
 		}
 		updatedProject, cmd := m.project.Update(msg)
 		m.project = updatedProject.(Project)
