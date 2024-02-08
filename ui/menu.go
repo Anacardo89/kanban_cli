@@ -11,8 +11,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// Implements tea.Model
 type Menu struct {
-	styles []lipgloss.Style
 	menu   *kanban.Menu
 	sp     *dll.Node
 	cursor int
@@ -22,16 +22,16 @@ type Menu struct {
 
 func NewMenu() Menu {
 	m := Menu{
-		styles: make([]lipgloss.Style, 10),
-		menu:   kanban.StartMenu(),
-		Input:  InputField{field: textinput.New()},
+		menu:  kanban.StartMenu(),
+		Input: InputField{field: textinput.New()},
 	}
+	setMenuItemDelegate()
+	m.setupMenuList()
 	return m
 }
 
 func TestData() Menu {
 	return Menu{
-		styles: make([]lipgloss.Style, 10),
 		cursor: 0,
 		menu:   kanban.TestData(),
 		Input:  InputField{field: textinput.New()},
@@ -47,10 +47,8 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		ws.width = msg.Width
-		ws.height = msg.Height
-		m.SetStyles()
-		m.SetupMenuList()
+		updateWindowSize(msg)
+		m.setupMenuList()
 		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {
@@ -104,13 +102,13 @@ func (m Menu) View() string {
 
 	if m.menu.Projects.Length() == 0 {
 		emptyTxt := "No projects.\n\nPress 'n' to create a new Project Board\nor 'q' to quit"
-		emptyTxtStyled = m.styles[empty].Render(emptyTxt)
+		emptyTxtStyled = EmptyStyle.Render(emptyTxt)
 		if m.Input.field.Focused() {
 			_, h := lipgloss.Size(emptyTxtStyled)
 			for i := 0; i < ws.height-h-h/2; i++ {
 				bottomLines += "\n"
 			}
-			inputStyled = m.styles[input].Render(m.Input.field.View())
+			inputStyled = InputFieldStyle.Render(m.Input.field.View())
 		}
 		output = lipgloss.Place(
 			ws.width,
@@ -126,9 +124,9 @@ func (m Menu) View() string {
 		return output
 	}
 
-	menuStyled = m.styles[listStyle].Render(m.list.View())
+	menuStyled = ListStyle.Render(m.list.View())
 	if m.Input.field.Focused() {
-		inputStyled = m.styles[input].Render(m.Input.field.View())
+		inputStyled = InputFieldStyle.Render(m.Input.field.View())
 	}
 	output = lipgloss.Place(
 		ws.width,
@@ -144,30 +142,7 @@ func (m Menu) View() string {
 	return output
 }
 
-func (m *Menu) getProject() *kanban.Project {
-	if m.menu.Projects.Length() == 0 {
-		return nil
-	}
-	node, err := m.menu.Projects.WalkTo(m.cursor)
-	if err != nil {
-		log.Println(err)
-	}
-	return node.Val().(*kanban.Project)
-}
-
-func (m *Menu) deleteProject() {
-	var err error
-	if m.menu.Projects.Length() == 0 {
-		return
-	}
-	p := m.sp.Val().(*kanban.Project)
-	err = m.menu.RemoveProject(p)
-	if err != nil {
-		log.Println(err)
-	}
-	m.SetupMenuList()
-}
-
+// movement
 func (m *Menu) handleMoveUp() {
 	var err error
 	if m.menu.Projects.Length() == 0 {
@@ -208,31 +183,27 @@ func (m *Menu) handleMoveDown() {
 	}
 }
 
-func (m *Menu) setInput() {
-	m.Input.field.Prompt = ": "
-	m.Input.field.CharLimit = 120
-	m.Input.field.Placeholder = "Project Title"
+// action
+func (m *Menu) getProject() *kanban.Project {
+	if m.menu.Projects.Length() == 0 {
+		return nil
+	}
+	node, err := m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+	}
+	return node.Val().(*kanban.Project)
 }
 
-func (m *Menu) handleInput(key string) {
-	switch key {
-	case "esc":
-		m.Input.field.SetValue("")
-		m.Input.data = ""
-		m.Input.field.Blur()
-		return
-	case "enter":
-		m.Input.data = m.Input.field.Value()
-		menuItem := Item{
-			title: m.Input.data,
-		}
-		menuItems = append(menuItems, menuItem)
-		m.list.SetItems(menuItems)
-		m.menu.AddProject(m.Input.data)
-		m.Input.data = ""
-		m.Input.field.SetValue("")
-		m.Input.field.Blur()
-		m.cursor = 0
+func (m *Menu) deleteProject() {
+	var err error
+	if m.menu.Projects.Length() == 0 {
 		return
 	}
+	p := m.sp.Val().(*kanban.Project)
+	err = m.menu.RemoveProject(p)
+	if err != nil {
+		log.Println(err)
+	}
+	m.setupMenuList()
 }
