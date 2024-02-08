@@ -62,8 +62,6 @@ func (p *Project) setInput() {
 }
 
 func (p *Project) handleInput(key string) {
-	var node *dll.Node
-	var err error
 	switch key {
 	case "esc":
 		p.Input.field.SetValue("")
@@ -80,13 +78,14 @@ func (p *Project) handleInput(key string) {
 			p.project.AddBoard(p.Input.data)
 			p.setupBoards()
 			p.hcursor = 0
-			node, err = p.project.Boards.HeadNode()
+		case add:
+			node, err := p.project.Boards.WalkTo(p.hcursor)
 			if err != nil {
 				log.Println(err)
+				err = nil
+				return
 			}
-			p.sb = node
-		case add:
-			board := p.sb.Val().(*kanban.Board)
+			board := node.Val().(*kanban.Board)
 			board.AddCard(p.Input.data)
 			boardItems = p.boards[p.hcursor].Items()
 			boardItem := Item{
@@ -94,16 +93,10 @@ func (p *Project) handleInput(key string) {
 			}
 			boardItems = append(boardItems, boardItem)
 			p.boards[p.hcursor].SetItems(boardItems)
-			node, _ = board.Cards.HeadNode()
-			if err != nil {
-				log.Println(err)
-			}
-			p.sc = node
 		}
 		p.Input.data = ""
 		p.Input.field.SetValue("")
 		p.Input.field.Blur()
-		p.vcursor = 0
 		return
 	}
 }
