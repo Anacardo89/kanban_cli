@@ -24,7 +24,7 @@ func NewMenu() Menu {
 		Input: InputField{field: textinput.New()},
 	}
 	setMenuItemDelegate()
-	m.setupMenuList()
+	m.setupList()
 	return m
 }
 
@@ -45,7 +45,7 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
-		m.setupMenuList()
+		m.setupList()
 		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {
@@ -141,7 +141,6 @@ func (m *Menu) getProject() *kanban.Project {
 	node, err := m.menu.Projects.WalkTo(m.cursor)
 	if err != nil {
 		log.Println(err)
-		err = nil
 	}
 	return node.Val().(*kanban.Project)
 }
@@ -154,15 +153,13 @@ func (m *Menu) deleteProject() {
 	node, err := m.menu.Projects.WalkTo(m.cursor)
 	if err != nil {
 		log.Println(err)
-		err = nil
 		return
 	}
 	p := node.Val().(*kanban.Project)
 	err = m.menu.RemoveProject(p)
 	if err != nil {
 		log.Println(err)
-		err = nil
 	}
-	m.setupMenuList()
+	m.setupList()
 	m.cursor = m.list.Cursor()
 }

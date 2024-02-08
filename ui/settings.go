@@ -21,11 +21,11 @@ func updateWindowSize(msg tea.WindowSizeMsg) {
 
 // Colors
 var (
+	BLACK                 = lipgloss.Color("#000000")
+	WHITE                 = lipgloss.Color("#ffffff")
 	DefaultBorderColor    = lipgloss.Color("#fc5603")
-	SelectedColor         = lipgloss.Color("#fff5e1")
 	ListItemColor         = lipgloss.Color("#42daf5")
 	SelectedListItemColor = lipgloss.Color("#e9f542")
-	MoveBarColor          = lipgloss.Color("#ffffff")
 )
 
 // Styles
@@ -78,7 +78,7 @@ func updateStyles() {
 		Bold(true)
 
 	ProjectListSelectedStyle = ProjectListStyle.Copy().
-		BorderForeground(SelectedColor)
+		BorderForeground(WHITE)
 
 	ProjectTitle = lipgloss.NewStyle().
 		Align(lipgloss.Center).
