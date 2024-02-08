@@ -99,12 +99,6 @@ func (p *Project) RemoveLabel(label *Label) error {
 	return err
 }
 
-func (p *Project) MoveCard(b1 *Board, b2 *Board, card *Card, cp2 int, remove int) {
-	tmpCard := card
-	b1.Cards.RemoveAt(remove)
-	b2.Cards.InsertAt(cp2, tmpCard)
-}
-
 // Label
 func (l *Label) RenameLabel(title string) {
 	l.Title = title

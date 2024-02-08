@@ -3,7 +3,6 @@ package ui
 import (
 	"log"
 
-	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -14,7 +13,6 @@ import (
 // Implements tea.Model
 type Menu struct {
 	menu   *kanban.Menu
-	sp     *dll.Node
 	cursor int
 	list   list.Model
 	Input  InputField
@@ -43,7 +41,6 @@ func (m Menu) Init() tea.Cmd {
 }
 
 func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -59,14 +56,6 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-		case "up":
-			m.handleMoveUp()
-			m.list, cmd = m.list.Update(msg)
-			return m, cmd
-		case "down":
-			m.handleMoveDown()
-			m.list, cmd = m.list.Update(msg)
-			return m, cmd
 		case "enter":
 			p := m.getProject()
 			if p == nil {
@@ -85,7 +74,9 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 	}
-	return m, nil
+	m.list, cmd = m.list.Update(msg)
+	m.cursor = m.list.Cursor()
+	return m, cmd
 }
 
 func (m Menu) View() string {
@@ -142,47 +133,6 @@ func (m Menu) View() string {
 	return output
 }
 
-// movement
-func (m *Menu) handleMoveUp() {
-	var err error
-	if m.menu.Projects.Length() == 0 {
-		return
-	}
-	if m.cursor == 0 {
-		m.cursor = m.menu.Projects.Length() - 1
-		m.sp, err = m.menu.Projects.TailNode()
-		if err != nil {
-			log.Println(err)
-		}
-		return
-	}
-	m.cursor--
-	m.sp, err = m.menu.Projects.WalkTo(m.cursor)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func (m *Menu) handleMoveDown() {
-	var err error
-	if m.menu.Projects.Length() == 0 {
-		return
-	}
-	if m.cursor == m.menu.Projects.Length()-1 {
-		m.cursor = 0
-		m.sp, err = m.menu.Projects.HeadNode()
-		if err != nil {
-			log.Println(err)
-		}
-		return
-	}
-	m.cursor++
-	m.sp, err = m.menu.Projects.WalkTo(m.cursor)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
 // action
 func (m *Menu) getProject() *kanban.Project {
 	if m.menu.Projects.Length() == 0 {
@@ -191,6 +141,7 @@ func (m *Menu) getProject() *kanban.Project {
 	node, err := m.menu.Projects.WalkTo(m.cursor)
 	if err != nil {
 		log.Println(err)
+		err = nil
 	}
 	return node.Val().(*kanban.Project)
 }
@@ -200,10 +151,18 @@ func (m *Menu) deleteProject() {
 	if m.menu.Projects.Length() == 0 {
 		return
 	}
-	p := m.sp.Val().(*kanban.Project)
+	node, err := m.menu.Projects.WalkTo(m.cursor)
+	if err != nil {
+		log.Println(err)
+		err = nil
+		return
+	}
+	p := node.Val().(*kanban.Project)
 	err = m.menu.RemoveProject(p)
 	if err != nil {
 		log.Println(err)
+		err = nil
 	}
 	m.setupMenuList()
+	m.cursor = m.list.Cursor()
 }
