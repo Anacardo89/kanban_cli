@@ -25,13 +25,6 @@ const (
 	delete inputFlag = "d"
 )
 
-type WindowSize struct {
-	width  int
-	height int
-}
-
-var ws WindowSize
-
 type Model struct {
 	state   modelState
 	menu    Menu
@@ -62,6 +55,8 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		updateWindowSize(msg)
 	case modelState:
 		m.state = msg
 	}

@@ -37,8 +37,7 @@ func (c Card) Init() tea.Cmd {
 func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		ws.width = msg.Width
-		ws.height = msg.Height
+		updateWindowSize(msg)
 		return c, nil
 	case tea.KeyMsg:
 		switch msg.String() {

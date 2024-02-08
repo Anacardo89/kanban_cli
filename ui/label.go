@@ -35,8 +35,7 @@ func (l Label) Init() tea.Cmd {
 func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		ws.width = msg.Width
-		ws.height = msg.Height
+		updateWindowSize(msg)
 		return l, nil
 	case tea.KeyMsg:
 		switch msg.String() {
