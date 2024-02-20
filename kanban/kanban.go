@@ -12,7 +12,6 @@ package kanban
 
 import (
 	"github.com/Anacardo89/ds/lists/dll"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Menu struct {
@@ -32,7 +31,7 @@ type Board struct {
 
 type Label struct {
 	Title string
-	Color lipgloss.Color
+	Color string
 }
 
 type Card struct {
@@ -86,7 +85,7 @@ func (p *Project) RemoveBoard(board *Board) error {
 	return err
 }
 
-func (p *Project) AddLabel(title string, color lipgloss.Color) {
+func (p *Project) AddLabel(title string, color string) {
 	label := &Label{
 		Title: title,
 		Color: color,
@@ -104,7 +103,7 @@ func (l *Label) RenameLabel(title string) {
 	l.Title = title
 }
 
-func (l *Label) ChangeColor(color lipgloss.Color) {
+func (l *Label) ChangeColor(color string) {
 	l.Color = color
 }
 

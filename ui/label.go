@@ -54,6 +54,7 @@ func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return l, tea.Quit
 		case "n":
+			l.inputFlag = title
 			l.setInput()
 			return l, l.Input.field.Focus()
 		case "d":

@@ -37,6 +37,7 @@ var (
 	ProjectListStyle         lipgloss.Style
 	ProjectListSelectedStyle lipgloss.Style
 	ProjectTitle             lipgloss.Style
+	CardStyle                lipgloss.Style
 )
 
 func updateStyles() {
@@ -84,4 +85,9 @@ func updateStyles() {
 		Align(lipgloss.Center).
 		MarginLeft(2).
 		Bold(true)
+
+	CardStyle = lipgloss.NewStyle().
+		Width(ws.width - 2).
+		BorderForeground(DefaultBorderColor).
+		BorderStyle(lipgloss.RoundedBorder())
 }

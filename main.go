@@ -3,12 +3,14 @@ package main
 import (
 	"log"
 
+	"github.com/Anacardo89/kanban_cli/logger"
 	"github.com/Anacardo89/kanban_cli/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	f, err := tea.LogToFile("log.log", "error")
+	logger.CreateLogger()
+	f, err := tea.LogToFile("ui.log", "error")
 	if err != nil {
 		log.Fatal(err)
 	}

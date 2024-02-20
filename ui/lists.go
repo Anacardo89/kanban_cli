@@ -6,149 +6,12 @@ import (
 	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Input Field
-type InputField struct {
-	field textinput.Model
-	data  string
-}
-
-// Menu
-func (m *Menu) setInput() {
-	m.Input.field.Prompt = ": "
-	m.Input.field.CharLimit = 120
-	m.Input.field.Placeholder = "Project Title"
-}
-
-func (m *Menu) handleInput(key string) {
-	switch key {
-	case "esc":
-		m.Input.field.SetValue("")
-		m.Input.data = ""
-		m.Input.field.Blur()
-		return
-	case "enter":
-		m.Input.data = m.Input.field.Value()
-		if m.Input.data == "" {
-			return
-		}
-		menuItem := Item{
-			title: m.Input.data,
-		}
-		menuItems = append(menuItems, menuItem)
-		m.list.SetItems(menuItems)
-		m.menu.AddProject(m.Input.data)
-		m.Input.data = ""
-		m.Input.field.SetValue("")
-		m.Input.field.Blur()
-		m.cursor = 0
-		return
-	}
-}
-
-// Project
-func (p *Project) setInput() {
-	p.Input.field.Prompt = ": "
-	p.Input.field.CharLimit = 120
-	switch p.inputFlag {
-	case new:
-		p.Input.field.Placeholder = "Board Title"
-	case add:
-		p.Input.field.Placeholder = "Card Title"
-	}
-}
-
-func (p *Project) handleInput(key string) {
-	switch key {
-	case "esc":
-		p.Input.field.SetValue("")
-		p.Input.data = ""
-		p.Input.field.Blur()
-		return
-	case "enter":
-		p.Input.data = p.Input.field.Value()
-		if p.Input.data == "" {
-			return
-		}
-		switch p.inputFlag {
-		case new:
-			p.project.AddBoard(p.Input.data)
-			p.setupBoards()
-			p.hcursor = 0
-		case add:
-			node, err := p.project.Boards.WalkTo(p.hcursor)
-			if err != nil {
-				log.Println(err)
-				err = nil
-				return
-			}
-			board := node.Val().(*kanban.Board)
-			board.AddCard(p.Input.data)
-			boardItems = p.boards[p.hcursor].Items()
-			boardItem := Item{
-				title: p.Input.data,
-			}
-			boardItems = append(boardItems, boardItem)
-			p.boards[p.hcursor].SetItems(boardItems)
-		}
-		p.Input.data = ""
-		p.Input.field.SetValue("")
-		p.Input.field.Blur()
-		return
-	}
-}
-
-// Label
-func (l *Label) setInput() {
-	l.Input.field.Prompt = ": "
-	l.Input.field.CharLimit = 120
-	l.Input.field.Placeholder = "Label Ttile"
-}
-
-func (l *Label) handleInput(key string) {
-	switch key {
-	case "esc":
-		l.Input.field.SetValue("")
-		l.Input.data = ""
-		l.Input.field.Blur()
-		return
-	case "enter":
-		if labelName == "" {
-			l.Input.data = l.Input.field.Value()
-			if l.Input.data == "" {
-				return
-			}
-			labelName = l.Input.data
-			l.Input.data = ""
-			l.Input.field.SetValue("")
-			l.Input.field.Placeholder = "Label Hex Color"
-			return
-		}
-		l.Input.data = l.Input.field.Value()
-		if l.Input.data[0] != '#' {
-			l.Input.data = string('#') + l.Input.data
-		}
-		if len(l.Input.data) != 7 {
-			return
-		}
-		l.project.AddLabel(labelName, lipgloss.Color(l.Input.data))
-		labelItem := Item{
-			title: l.Input.data,
-		}
-		labelItems = append(labelItems, labelItem)
-		l.list.SetItems(labelItems)
-		l.setupList()
-		l.Input.data = ""
-		l.Input.field.SetValue("")
-		l.Input.field.Blur()
-	}
-}
-
 // List
 // Implement list.Item interface
+
 type Item struct {
 	title       string
 	description string
@@ -169,6 +32,7 @@ var (
 func setMenuItemDelegate() {
 	NoDescDelegate = list.NewDefaultDelegate()
 	NoDescDelegate.ShowDescription = false
+	NoDescDelegate.SetSpacing(0)
 	NoDescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
 	NoDescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
 		Border(lipgloss.HiddenBorder(), false, false, false, true)
@@ -177,6 +41,7 @@ func setMenuItemDelegate() {
 func setBoardItemDelegate() {
 	DescDelegate = list.NewDefaultDelegate()
 	DescDelegate.ShowDescription = true
+	DescDelegate.SetSpacing(0)
 	DescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
 	DescDelegate.Styles.NormalDesc = DescDelegate.Styles.NormalTitle.Copy()
 	DescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
@@ -187,6 +52,7 @@ func setBoardItemDelegate() {
 func setLabelItemDelegate() {
 	LabelDelegate = list.NewDefaultDelegate()
 	LabelDelegate.ShowDescription = true
+	DescDelegate.SetSpacing(0)
 	LabelDelegate.Styles.NormalTitle.Foreground(ListItemColor)
 	LabelDelegate.Styles.NormalDesc = LabelDelegate.Styles.NormalTitle.Copy()
 	LabelDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
@@ -207,14 +73,11 @@ func setMoveDelegate() {
 }
 
 // Menu
-var (
-	menuItems []list.Item
-)
 
 func (m *Menu) setupList() {
 	var (
-		node  *dll.Node
-		items []list.Item
+		node      *dll.Node
+		menuItems []list.Item
 	)
 	l := list.New([]list.Item{}, NoDescDelegate, ws.width/3, ws.height-9)
 	l.SetShowHelp(false)
@@ -226,9 +89,9 @@ func (m *Menu) setupList() {
 		item := Item{
 			title: project.Title,
 		}
-		items = append(items, item)
+		menuItems = append(menuItems, item)
 	}
-	l.SetItems(items)
+	l.SetItems(menuItems)
 	m.list = l
 }
 
@@ -275,13 +138,11 @@ func (p *Project) setupBoards() {
 	p.boards = boards
 }
 
-// List
-var labelItems []list.Item
-
+// Label
 func (l *Label) setupList() {
 	var (
-		node  *dll.Node
-		items []list.Item
+		node       *dll.Node
+		labelItems []list.Item
 	)
 	lst := list.New([]list.Item{}, LabelDelegate, ws.width/3, ws.height-9)
 	lst.SetShowHelp(false)
@@ -291,13 +152,53 @@ func (l *Label) setupList() {
 		node, _ = l.project.Labels.WalkTo(i)
 		label := node.Val().(*kanban.Label)
 		item := Item{
-			title: label.Title,
+			title:       label.Title,
+			description: label.Color,
 		}
-		LabelDelegate.Styles.NormalDesc.Background(label.Color)
-		LabelDelegate.Styles.SelectedDesc.Background(label.Color)
+		LabelDelegate.Styles.NormalDesc.Background(lipgloss.Color(label.Color))
+		LabelDelegate.Styles.SelectedDesc.Background(lipgloss.Color(label.Color))
 		labelItems = append(labelItems, item)
 	}
-	lst.SetItems(items)
+	lst.SetItems(labelItems)
 	l.list = lst
 	l.cursor = l.list.Cursor()
+}
+
+// Card
+func (c *Card) setupLists() {
+	var (
+		node           *dll.Node
+		checklistItems []list.Item
+		labelItems     []list.Item
+	)
+
+	cl := list.New([]list.Item{}, NoDescDelegate, ws.width/2, ws.height/2-4)
+	cl.SetShowHelp(false)
+	cl.Title = "Checklist"
+	cl.InfiniteScrolling = true
+	for i := 0; i < c.card.CheckList.Length(); i++ {
+		node, _ = c.card.CheckList.WalkTo(i)
+		checkItem := node.Val().(*kanban.CheckItem)
+		item := Item{
+			title: checkItem.Title,
+		}
+		checklistItems = append(checklistItems, item)
+	}
+	cl.SetItems(checklistItems)
+	c.checklist = cl
+
+	ll := list.New([]list.Item{}, DescDelegate, ws.width/2, ws.height/2-4)
+	ll.SetShowHelp(false)
+	ll.Title = "Card Labels"
+	ll.InfiniteScrolling = true
+	for i := 0; i < c.card.CardLabels.Length(); i++ {
+		node, _ = c.card.CardLabels.WalkTo(i)
+		label := node.Val().(*kanban.CheckItem)
+		item := Item{
+			title: label.Title,
+		}
+		labelItems = append(labelItems, item)
+	}
+	ll.SetItems(labelItems)
+	c.labels = ll
 }
