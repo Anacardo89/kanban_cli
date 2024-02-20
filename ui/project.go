@@ -92,6 +92,9 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.inputFlag = delete
 			return p, nil
 		case "m":
+			if p.project.Boards.Length() == 0 {
+				return p, nil
+			}
 			p.inputFlag = move
 			p.moveFrom = []int{p.hcursor, p.vcursor}
 			p.boards[p.hcursor].SetDelegate(TopWhiteDelegate)

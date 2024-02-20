@@ -23,6 +23,8 @@ const (
 	rename inputFlag = "r"
 	move   inputFlag = "m"
 	delete inputFlag = "d"
+	color  inputFlag = "color"
+	title  inputFlag = "title"
 )
 
 type Model struct {

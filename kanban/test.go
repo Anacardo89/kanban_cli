@@ -2,8 +2,6 @@ package kanban
 
 import (
 	"log"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
 func TestData() *Menu {
@@ -24,10 +22,10 @@ func TestData() *Menu {
 	project2Val.AddBoard("Board 1")
 	project1Val.AddBoard("Board 2")
 	project2Val.AddBoard("Board 2")
-	project1Val.AddLabel("Label 1", lipgloss.Color("30"))
-	project1Val.AddLabel("Label 2", lipgloss.Color("50"))
-	project2Val.AddLabel("Label 1", lipgloss.Color("30"))
-	project2Val.AddLabel("Label 2", lipgloss.Color("50"))
+	project1Val.AddLabel("Label 1", "30")
+	project1Val.AddLabel("Label 2", "50")
+	project2Val.AddLabel("Label 1", "30")
+	project2Val.AddLabel("Label 2", "50")
 	project1Board1, err := project1Val.Boards.WalkTo(0)
 	if err != nil {
 		log.Println(err)

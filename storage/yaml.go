@@ -3,7 +3,6 @@ package storage
 import (
 	"log"
 
-	"github.com/charmbracelet/lipgloss"
 	"gopkg.in/yaml.v2"
 )
 
@@ -23,8 +22,8 @@ type Board struct {
 }
 
 type Label struct {
-	Title string         `yaml:"title"`
-	Color lipgloss.Color `yaml:"color"`
+	Title string `yaml:"title"`
+	Color string `yaml:"color"`
 }
 
 type Card struct {

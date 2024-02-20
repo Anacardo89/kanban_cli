@@ -10,10 +10,9 @@ import (
 )
 
 type Card struct {
-	styles    []lipgloss.Style
 	card      *kanban.Card
-	checklist []list.Model
-	labels    []list.Model
+	checklist list.Model
+	labels    list.Model
 	hcursor   int
 	vcursor   int
 	sc        *dll.Node
@@ -23,10 +22,10 @@ type Card struct {
 
 func OpenCard(kc *kanban.Card) Card {
 	c := Card{
-		styles: make([]lipgloss.Style, 10),
-		card:   kc,
-		Input:  InputField{field: textinput.New()},
+		card:  kc,
+		Input: InputField{field: textinput.New()},
 	}
+	c.setupLists()
 	return c
 }
 
@@ -38,6 +37,7 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
+		c.setupLists()
 		return c, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -50,7 +50,7 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return c, nil
 }
 
-func (c Card) View() string {
+func (c Card) Vitew() string {
 	if ws.width == 0 {
 		return "loading..."
 	}
@@ -62,5 +62,38 @@ func (c Card) View() string {
 		lipgloss.Center,
 		"card",
 	)
+	return output
+}
+
+func (c Card) View() string {
+	if ws.width == 0 {
+		return "loading..."
+	}
+	var (
+		emptyLine   = "\n"
+		inputStyled = ""
+		output      = ""
+	)
+	checklistStyled := ListStyle.Render(c.checklist.View())
+	cardlabelsStyled := ListStyle.Render(c.labels.View())
+	listsStyled := lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		checklistStyled,
+		cardlabelsStyled,
+	)
+	if c.Input.field.Focused() {
+		inputStyled = InputFieldStyle.Render(c.Input.field.View())
+	}
+	output = CardStyle.Render(lipgloss.JoinVertical(
+		lipgloss.Left,
+		"Title:",
+		c.card.Title,
+		emptyLine,
+		"Description:",
+		c.card.Description,
+		emptyLine,
+		listsStyled,
+		inputStyled,
+	))
 	return output
 }
