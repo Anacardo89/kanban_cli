@@ -116,10 +116,10 @@ func (l Label) View() string {
 	output = lipgloss.Place(
 		ws.width,
 		ws.height,
-		lipgloss.Left,
+		lipgloss.Center,
 		lipgloss.Top,
 		lipgloss.JoinVertical(
-			lipgloss.Left,
+			lipgloss.Center,
 			labelStyled,
 			bottomLines,
 			inputStyled,

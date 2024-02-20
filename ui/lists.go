@@ -25,7 +25,7 @@ func (i Item) FilterValue() string { return i.title }
 var (
 	NoDescDelegate   list.DefaultDelegate
 	DescDelegate     list.DefaultDelegate
-	LabelDelegate    list.DefaultDelegate
+	LabelDelegate    LabelListDelegate
 	TopWhiteDelegate list.DefaultDelegate
 )
 
@@ -50,9 +50,8 @@ func setBoardItemDelegate() {
 }
 
 func setLabelItemDelegate() {
-	LabelDelegate = list.NewDefaultDelegate()
+	LabelDelegate = NewLabelListDelegate()
 	LabelDelegate.ShowDescription = true
-	DescDelegate.SetSpacing(0)
 	LabelDelegate.Styles.NormalTitle.Foreground(ListItemColor)
 	LabelDelegate.Styles.NormalDesc = LabelDelegate.Styles.NormalTitle.Copy()
 	LabelDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
@@ -65,6 +64,7 @@ func setMoveDelegate() {
 	TopWhiteDelegate.Styles.NormalTitle.Foreground(ListItemColor)
 	TopWhiteDelegate.Styles.SelectedTitle.
 		Foreground(SelectedListItemColor).
+		Padding(0, 0, 0, 2).
 		BorderLeft(false).
 		BorderTop(true).
 		BorderForeground(WHITE)
@@ -144,7 +144,7 @@ func (l *Label) setupList() {
 		node       *dll.Node
 		labelItems []list.Item
 	)
-	lst := list.New([]list.Item{}, LabelDelegate, ws.width/3, ws.height-9)
+	lst := list.New([]list.Item{}, NewLabelListDelegate(), ws.width/3, ws.height-9)
 	lst.SetShowHelp(false)
 	lst.Title = "Labels"
 	lst.InfiniteScrolling = true
@@ -155,8 +155,6 @@ func (l *Label) setupList() {
 			title:       label.Title,
 			description: label.Color,
 		}
-		LabelDelegate.Styles.NormalDesc.Background(lipgloss.Color(label.Color))
-		LabelDelegate.Styles.SelectedDesc.Background(lipgloss.Color(label.Color))
 		labelItems = append(labelItems, item)
 	}
 	lst.SetItems(labelItems)
