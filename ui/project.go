@@ -40,10 +40,10 @@ func (p Project) Init() tea.Cmd {
 
 func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	p.setupBoards()
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
-		p.setupBoards()
 		return p, nil
 	case tea.KeyMsg:
 		if p.Input.field.Focused() {
@@ -78,15 +78,15 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return p, func() tea.Msg { return card }
 		case "n":
-			p.inputFlag = new
 			p.setInput()
+			p.inputFlag = new
 			return p, p.Input.field.Focus()
 		case "a":
 			if p.project.Boards.Length() == 0 {
 				return p, nil
 			}
-			p.inputFlag = add
 			p.setInput()
+			p.inputFlag = add
 			return p, p.Input.field.Focus()
 		case "d":
 			p.inputFlag = delete

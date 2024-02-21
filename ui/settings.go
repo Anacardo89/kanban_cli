@@ -32,8 +32,10 @@ var (
 var (
 	DefaultStyle             lipgloss.Style
 	EmptyStyle               lipgloss.Style
+	SelectedTxtStyle         lipgloss.Style
 	InputFieldStyle          lipgloss.Style
 	ListStyle                lipgloss.Style
+	SelectedListStyle        lipgloss.Style
 	ProjectListStyle         lipgloss.Style
 	ProjectListSelectedStyle lipgloss.Style
 	ProjectTitle             lipgloss.Style
@@ -57,6 +59,9 @@ func updateStyles() {
 		Padding(1, 3).
 		Bold(true)
 
+	SelectedTxtStyle = lipgloss.NewStyle().
+		Foreground(SelectedListItemColor)
+
 	InputFieldStyle = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
 		BorderStyle(lipgloss.RoundedBorder()).
@@ -67,7 +72,14 @@ func updateStyles() {
 	ListStyle = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
 		BorderStyle(lipgloss.RoundedBorder()).
-		Margin(1, 1, 0).
+		Margin(0, 1).
+		Padding(1).
+		Bold(true)
+
+	SelectedListStyle = lipgloss.NewStyle().
+		BorderForeground(WHITE).
+		BorderStyle(lipgloss.RoundedBorder()).
+		Margin(0, 1).
 		Padding(1).
 		Bold(true)
 
