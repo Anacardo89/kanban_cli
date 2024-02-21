@@ -51,6 +51,8 @@ func (p *Project) setInput() {
 		p.Input.field.Placeholder = "Board Title"
 	case add:
 		p.Input.field.Placeholder = "Card Title"
+	case rename:
+		p.Input.field.Placeholder = "Project Title"
 	}
 }
 
@@ -81,10 +83,13 @@ func (p *Project) handleInput(key string) {
 			board := node.Val().(*kanban.Board)
 			board.AddCard(p.Input.data)
 			p.setupBoards()
+		case rename:
+			p.project.RenameProject(p.Input.data)
 		}
 		p.Input.data = ""
 		p.Input.field.SetValue("")
 		p.Input.field.Blur()
+		p.inputFlag = none
 		return
 	}
 }
@@ -138,6 +143,9 @@ func (l *Label) handleInput(key string) {
 func (c *Card) setInput() {
 	c.Input.field.Prompt = ": "
 	c.Input.field.CharLimit = 120
+	if c.inputFlag == new {
+		c.Input.field.Placeholder = "CheckItem Title"
+	}
 	c.Input.field.Placeholder = "Card Title"
 }
 

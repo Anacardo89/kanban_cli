@@ -6,6 +6,8 @@ import (
 )
 
 type modelState int
+type updateFlag int
+type inputFlag string
 
 const (
 	menu modelState = iota
@@ -14,7 +16,11 @@ const (
 	label
 )
 
-type inputFlag string
+const (
+	upNone updateFlag = iota
+	upMenu
+	upProject
+)
 
 const (
 	none   inputFlag = "none"
@@ -29,6 +35,7 @@ const (
 
 type Model struct {
 	state   modelState
+	update  updateFlag
 	menu    Menu
 	project Project
 	sp      *kanban.Project
@@ -59,9 +66,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
+	case updateFlag:
+		m.update = msg
 	case modelState:
 		m.state = msg
 	}
+
+	switch m.update {
+	case upMenu:
+		m.update = upNone
+		m.menu.UpdateMenu()
+		return m, func() tea.Msg { return menu }
+	case upProject:
+		m.update = upNone
+		m.project.UpdateProject()
+		return m, func() tea.Msg { return project }
+	}
+
 	switch m.state {
 	case menu:
 		updatedMenu, cmd := m.menu.Update(msg)

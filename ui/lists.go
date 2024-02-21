@@ -79,7 +79,7 @@ func (m *Menu) setupList() {
 		node      *dll.Node
 		menuItems []list.Item
 	)
-	l := list.New([]list.Item{}, NoDescDelegate, ws.width/3, ws.height-9)
+	l := list.New([]list.Item{}, NoDescDelegate, ws.width/3, ws.height-6)
 	l.SetShowHelp(false)
 	l.Title = "Projects"
 	l.InfiniteScrolling = true
@@ -167,7 +167,7 @@ func (c *Card) setupLists() {
 		labelItems     []list.Item
 	)
 
-	cl := list.New([]list.Item{}, NoDescDelegate, ws.width/2, ws.height/2-4)
+	cl := list.New([]list.Item{}, NewCheckListDelegate(), ws.width/2, ws.height/3+1)
 	cl.SetShowHelp(false)
 	cl.Title = "Checklist"
 	cl.InfiniteScrolling = true
@@ -177,12 +177,17 @@ func (c *Card) setupLists() {
 		item := Item{
 			title: checkItem.Title,
 		}
+		if checkItem.Check {
+			item.description = "1"
+		} else {
+			item.description = "0"
+		}
 		checklistItems = append(checklistItems, item)
 	}
 	cl.SetItems(checklistItems)
 	c.checklist = cl
 
-	ll := list.New([]list.Item{}, NewLabelListDelegate(), ws.width/2, ws.height/2-4)
+	ll := list.New([]list.Item{}, NewLabelListDelegate(), ws.width/2, ws.height/3+1)
 	ll.SetShowHelp(false)
 	ll.Title = "Card Labels"
 	ll.InfiniteScrolling = true

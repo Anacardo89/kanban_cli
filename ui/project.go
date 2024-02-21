@@ -34,24 +34,32 @@ func OpenProject(kp *kanban.Project) Project {
 	return p
 }
 
+func (p *Project) UpdateProject() {
+	p.setupBoards()
+}
+
 func (p Project) Init() tea.Cmd {
 	return nil
 }
 
 func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	p.setupBoards()
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
+		p.setupBoards()
 		return p, nil
 	case tea.KeyMsg:
+
 		if p.Input.field.Focused() {
 			p.handleInput(msg.String())
 			p.Input.field, cmd = p.Input.field.Update(msg)
 			return p, cmd
 		}
-		if p.inputFlag == delete {
+
+		switch p.inputFlag {
+		case delete:
+			p.inputFlag = none
 			p.handleDelete(msg.String())
 			return p, nil
 		}
@@ -78,15 +86,15 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return p, func() tea.Msg { return card }
 		case "n":
-			p.setInput()
 			p.inputFlag = new
+			p.setInput()
 			return p, p.Input.field.Focus()
 		case "a":
 			if p.project.Boards.Length() == 0 {
 				return p, nil
 			}
-			p.setInput()
 			p.inputFlag = add
+			p.setInput()
 			return p, p.Input.field.Focus()
 		case "d":
 			p.inputFlag = delete
@@ -101,13 +109,17 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return p, nil
 		case "l":
 			return p, func() tea.Msg { return label }
+		case "r":
+			p.inputFlag = rename
+			p.setInput()
+			return p, p.Input.field.Focus()
 		case "esc":
 			if p.inputFlag == move {
 				p.boards[p.hcursor].SetDelegate(DescDelegate)
 				p.inputFlag = none
 				return p, nil
 			}
-			return p, func() tea.Msg { return menu }
+			return p, func() tea.Msg { return upMenu }
 		}
 	}
 	if p.project.Boards.Length() > 0 {
