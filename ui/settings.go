@@ -24,8 +24,9 @@ var (
 	BLACK                 = lipgloss.Color("#000000")
 	WHITE                 = lipgloss.Color("#ffffff")
 	DefaultBorderColor    = lipgloss.Color("#fc5603")
-	ListItemColor         = lipgloss.Color("#42daf5")
+	ListItemColor         = lipgloss.Color("#ffffff")
 	SelectedListItemColor = lipgloss.Color("#e9f542")
+	DoneItemColor         = lipgloss.Color("#0ff702")
 )
 
 // Styles
@@ -34,8 +35,10 @@ var (
 	EmptyStyle               lipgloss.Style
 	SelectedTxtStyle         lipgloss.Style
 	InputFieldStyle          lipgloss.Style
+	TextAreaStyle            lipgloss.Style
 	ListStyle                lipgloss.Style
 	SelectedListStyle        lipgloss.Style
+	DoneItemStyle            lipgloss.Style
 	ProjectListStyle         lipgloss.Style
 	ProjectListSelectedStyle lipgloss.Style
 	ProjectTitle             lipgloss.Style
@@ -69,19 +72,31 @@ func updateStyles() {
 		Width(ws.width - 2).
 		Bold(true)
 
+	TextAreaStyle = lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder(), false, false, false, true).
+		BorderLeftForeground(DefaultBorderColor).
+		AlignHorizontal(lipgloss.Left).
+		PaddingLeft(2).
+		Width(ws.width - 4).
+		Height(ws.height / 4).
+		Bold(true)
+
 	ListStyle = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
 		BorderStyle(lipgloss.RoundedBorder()).
 		Margin(0, 1).
-		Padding(1).
+		Padding(0).
 		Bold(true)
 
 	SelectedListStyle = lipgloss.NewStyle().
 		BorderForeground(WHITE).
 		BorderStyle(lipgloss.RoundedBorder()).
 		Margin(0, 1).
-		Padding(1).
+		Padding(0).
 		Bold(true)
+
+	DoneItemStyle = lipgloss.NewStyle().
+		Strikethrough(true)
 
 	ProjectListStyle = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).

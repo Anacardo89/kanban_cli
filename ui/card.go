@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"log"
+
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
@@ -9,23 +11,32 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type cursorPos int
+
+const (
+	titlePos cursorPos = iota
+	descPos
+	checkPos
+	labelPos
+)
+
 type Card struct {
 	card      *kanban.Card
 	checklist list.Model
 	labels    list.Model
-	cursor    int
+	cursor    cursorPos
 	icursor   int
 	Input     InputField
-	TxtArea   TextArea
+	textarea  textarea.Model
 	inputFlag inputFlag
 }
 
 func OpenCard(kc *kanban.Card) Card {
 	c := Card{
-		card:    kc,
-		Input:   InputField{field: textinput.New()},
-		TxtArea: TextArea{field: textarea.New()},
-		cursor:  0,
+		card:     kc,
+		Input:    InputField{field: textinput.New()},
+		textarea: textarea.New(),
+		cursor:   0,
 	}
 	c.setupLists()
 	return c
@@ -37,10 +48,12 @@ func (c Card) Init() tea.Cmd {
 
 func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	c.setupLists()
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
+		c.setupLists()
+		c.setTxtArea()
 		return c, nil
 	case tea.KeyMsg:
 		if c.Input.field.Focused() {
@@ -52,20 +65,34 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return c, tea.Quit
 		case "esc":
-			return c, func() tea.Msg { return project }
+			return c, func() tea.Msg { return upProject }
 		case "right":
 			c.handleMoveRight()
 		case "left":
 			c.handleMoveLeft()
+		case "n":
+			if c.cursor == checkPos {
+				c.inputFlag = new
+				c.setInput()
+				c.Input.field.Focus()
+			}
+			return c, nil
+		case "d":
+			if c.cursor == checkPos || c.cursor == labelPos {
+				c.handleDelete()
+			}
 		case "enter":
 			c.setInput()
 			c.handleEnter()
 		}
 	}
-	if c.cursor == 1 {
+
+	if c.cursor == checkPos {
 		c.checklist, cmd = c.checklist.Update(msg)
-	} else if c.cursor == 2 {
+		c.icursor = c.checklist.Cursor()
+	} else if c.cursor == labelPos {
 		c.labels, cmd = c.labels.Update(msg)
+		c.icursor = c.labels.Cursor()
 	}
 	return c, cmd
 }
@@ -80,33 +107,36 @@ func (c Card) View() string {
 		descriptionStyled = "Description"
 		txtareaStyled     = ""
 		emptyLine         = ""
-		bottomLines       = ""
 		inputStyled       = ""
 		output            = ""
 	)
+
+	if c.Input.field.Focused() {
+		inputStyled = InputFieldStyle.Render(c.Input.field.View())
+	}
+	txtareaStyled = TextAreaStyle.Render(c.textarea.View())
 	checklistStyled := ListStyle.Render(c.checklist.View())
 	cardlabelsStyled := ListStyle.Render(c.labels.View())
+
+	// highlight selected
 	switch c.cursor {
-	case 0:
+	case titlePos:
 		titleStyled = SelectedTxtStyle.Render(titleStyled)
-	case 1:
+	case descPos:
 		descriptionStyled = SelectedTxtStyle.Render(descriptionStyled)
-	case 2:
+	case checkPos:
 		checklistStyled = SelectedListStyle.Render(c.checklist.View())
-	case 3:
+	case labelPos:
 		cardlabelsStyled = SelectedListStyle.Render(c.labels.View())
 	}
+
+	// build output
 	listsStyled := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		checklistStyled,
 		cardlabelsStyled,
 	)
-	if c.Input.field.Focused() {
-		inputStyled = InputFieldStyle.Render(c.Input.field.View())
-	}
-	if c.TxtArea.field.Focused() {
-		txtareaStyled = InputFieldStyle.Render(c.TxtArea.field.View())
-	}
+
 	cardStyled = CardStyle.Render(lipgloss.JoinVertical(
 		lipgloss.Left,
 		titleStyled,
@@ -114,10 +144,9 @@ func (c Card) View() string {
 		emptyLine,
 		descriptionStyled,
 		txtareaStyled,
-		c.card.Description,
-		emptyLine,
 		listsStyled,
 	))
+
 	output = lipgloss.Place(
 		ws.width,
 		ws.height,
@@ -126,7 +155,6 @@ func (c Card) View() string {
 		lipgloss.JoinVertical(
 			lipgloss.Center,
 			cardStyled,
-			bottomLines,
 			inputStyled,
 		))
 	return output
@@ -134,29 +162,77 @@ func (c Card) View() string {
 
 // movement
 func (c *Card) handleMoveRight() {
-	if c.cursor == 3 {
-		c.cursor = 0
+	if c.cursor == labelPos {
+		c.cursor = titlePos
 	} else {
 		c.cursor++
 	}
 }
 
 func (c *Card) handleMoveLeft() {
-	if c.cursor == 0 {
-		c.cursor = 3
+	if c.cursor == titlePos {
+		c.cursor = labelPos
 	} else {
 		c.cursor--
 	}
 }
 
 // action
+func (c *Card) getCheckItem() *kanban.CheckItem {
+	if c.card.CheckList.Length() == 0 {
+		return nil
+	}
+	c.icursor = c.checklist.Cursor()
+	node, err := c.card.CheckList.WalkTo(c.icursor)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return node.Val().(*kanban.CheckItem)
+}
+
+func (c *Card) getCardLabel() *kanban.Label {
+	if c.card.CardLabels.Length() == 0 {
+		return nil
+	}
+	c.icursor = c.labels.Cursor()
+	node, err := c.card.CardLabels.WalkTo(c.icursor)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return node.Val().(*kanban.Label)
+}
+
+func (c *Card) handleDelete() {
+	switch c.cursor {
+	case checkPos:
+		node, err := c.card.CheckList.WalkTo(c.checklist.Cursor())
+		if err != nil {
+			log.Println(err)
+		}
+		checkitem := node.Val().(*kanban.CheckItem)
+		c.card.RemoveCheckItem(checkitem)
+	case labelPos:
+		node, err := c.card.CardLabels.WalkTo(c.labels.Cursor())
+		if err != nil {
+			log.Println(err)
+		}
+		cardlabel := node.Val().(*kanban.Label)
+		c.card.RemoveLabel(cardlabel)
+	}
+	c.setupLists()
+}
+
 func (c *Card) handleEnter() {
 	switch c.cursor {
-	case 0:
+	case titlePos:
 		c.Input.field.Focus()
-	case 1:
-		c.TxtArea.field.Focus()
-	case 2:
-
+	case descPos:
+		c.textarea.Focus()
+	case checkPos:
+		checkitem := c.getCheckItem()
+		checkitem.CheckCheckItem()
+		c.setupLists()
 	}
 }

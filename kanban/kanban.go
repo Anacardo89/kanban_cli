@@ -148,11 +148,11 @@ func (c *Card) RemoveCheckItem(checkItem *CheckItem) error {
 	return err
 }
 
-func (c *Card) AddLabel(label Label) {
+func (c *Card) AddLabel(label *Label) {
 	c.CardLabels.Append(label)
 }
 
-func (c *Card) RemoveLabel(label dll.DLL) error {
+func (c *Card) RemoveLabel(label *Label) error {
 	_, err := c.CardLabels.Remove(label)
 	return err
 }
