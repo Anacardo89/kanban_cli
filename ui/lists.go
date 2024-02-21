@@ -96,8 +96,6 @@ func (m *Menu) setupList() {
 }
 
 // Project
-var boardItems []list.Item
-
 func (p *Project) setupBoards() {
 	var (
 		err      error
@@ -159,7 +157,6 @@ func (l *Label) setupList() {
 	}
 	lst.SetItems(labelItems)
 	l.list = lst
-	l.cursor = l.list.Cursor()
 }
 
 // Card
@@ -185,7 +182,7 @@ func (c *Card) setupLists() {
 	cl.SetItems(checklistItems)
 	c.checklist = cl
 
-	ll := list.New([]list.Item{}, DescDelegate, ws.width/2, ws.height/2-4)
+	ll := list.New([]list.Item{}, NewLabelListDelegate(), ws.width/2, ws.height/2-4)
 	ll.SetShowHelp(false)
 	ll.Title = "Card Labels"
 	ll.InfiniteScrolling = true

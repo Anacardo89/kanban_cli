@@ -42,10 +42,10 @@ func (m Menu) Init() tea.Cmd {
 
 func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	m.setupList()
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
-		m.setupList()
 		return m, nil
 	case tea.KeyMsg:
 		if m.Input.field.Focused() {

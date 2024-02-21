@@ -21,10 +21,11 @@ type LabelItemStyles struct {
 
 func NewLabelItemStyles() (s LabelItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
-		Foreground(ListItemColor).
-		Padding(0, 0, 0, 2)
+		Foreground(ListItemColor)
 	s.NormalDesc = s.NormalTitle.Copy().
 		Foreground(BLACK)
+	s.SelectedTitle = lipgloss.NewStyle().
+		Foreground(SelectedListItemColor)
 	s.SelectedDesc = s.SelectedTitle.Copy().
 		Foreground(BLACK)
 	return s
@@ -84,29 +85,24 @@ func (d LabelListDelegate) Render(w io.Writer, l list.Model, index int, item lis
 
 	textwidth := uint(l.Width() - s.NormalTitle.GetPaddingLeft() - s.NormalTitle.GetPaddingRight())
 	title = truncate.StringWithTail(title, textwidth, "...")
-	if d.ShowDescription {
-		var lines []string
-		for i, line := range strings.Split(desc, "\n") {
-			if i >= d.height-1 {
-				break
-			}
-			lines = append(lines, truncate.StringWithTail(line, textwidth, "..."))
+	var lines []string
+	for i, line := range strings.Split(desc, "\n") {
+		if i >= d.height-1 {
+			break
 		}
-		desc = strings.Join(lines, "\n")
+		lines = append(lines, truncate.StringWithTail(line, textwidth, "..."))
 	}
+	desc = strings.Join(lines, "\n")
 
 	isSelected := index == l.Index()
 
 	if isSelected {
 		title = s.SelectedTitle.Render(title)
+		desc = s.SelectedDesc.Background(lipgloss.Color(desc)).Render(desc)
+	} else {
+		title = s.NormalTitle.Render(title)
 	}
-	title = s.NormalTitle.Render(title)
 	desc = s.NormalDesc.Background(lipgloss.Color(desc)).Render(desc)
-	desc = s.SelectedDesc.Background(lipgloss.Color(desc)).Render(desc)
 
-	if d.ShowDescription {
-		fmt.Fprintf(w, "%s\n%s", title, desc)
-		return
-	}
-	fmt.Fprintf(w, "%s", title)
+	fmt.Fprintf(w, "%s\n%s", title, desc)
 }

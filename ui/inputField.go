@@ -80,12 +80,7 @@ func (p *Project) handleInput(key string) {
 			}
 			board := node.Val().(*kanban.Board)
 			board.AddCard(p.Input.data)
-			boardItems = p.boards[p.hcursor].Items()
-			boardItem := Item{
-				title: p.Input.data,
-			}
-			boardItems = append(boardItems, boardItem)
-			p.boards[p.hcursor].SetItems(boardItems)
+			p.setupBoards()
 		}
 		p.Input.data = ""
 		p.Input.field.SetValue("")
@@ -136,5 +131,38 @@ func (l *Label) handleInput(key string) {
 			l.Input.field.Blur()
 			l.inputFlag = none
 		}
+	}
+}
+
+// Card
+func (c *Card) setInput() {
+	c.Input.field.Prompt = ": "
+	c.Input.field.CharLimit = 120
+	c.Input.field.Placeholder = "Card Title"
+}
+
+func (c *Card) handleInput(key string) {
+	switch key {
+	case "esc":
+		c.Input.field.SetValue("")
+		c.Input.data = ""
+		c.Input.field.Blur()
+		return
+	case "enter":
+		c.Input.data = c.Input.field.Value()
+		if c.Input.data == "" {
+			return
+		}
+		switch c.cursor {
+		case 0:
+			c.card.RenameCard(c.Input.data)
+		case 2:
+			c.card.AddCheckItem(c.Input.data)
+		}
+		c.setupLists()
+		c.Input.data = ""
+		c.Input.field.SetValue("")
+		c.Input.field.Blur()
+		return
 	}
 }

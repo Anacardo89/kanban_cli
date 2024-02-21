@@ -42,6 +42,7 @@ func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		updateWindowSize(msg)
+		l.setInput()
 		l.setupList()
 		return l, nil
 	case tea.KeyMsg:
@@ -55,7 +56,6 @@ func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return l, tea.Quit
 		case "n":
 			l.inputFlag = title
-			l.setInput()
 			return l, l.Input.field.Focus()
 		case "d":
 			label := l.getLabel()
@@ -127,7 +127,7 @@ func (l Label) View() string {
 	return output
 }
 
-// Action
+// action
 func (l *Label) getLabel() *kanban.Label {
 	if l.project.Labels.Length() == 0 {
 		return nil
