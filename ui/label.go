@@ -30,6 +30,7 @@ func OpenLabels(kp *kanban.Project) Label {
 	}
 	setLabelItemDelegate()
 	l.setupList()
+	l.setInput()
 	return l
 }
 
@@ -66,6 +67,8 @@ func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return l, nil
 		case "b", "esc":
 			return l, func() tea.Msg { return project }
+		case "enter":
+			return l, func() tea.Msg { return upLabel }
 		}
 	}
 	l.list, cmd = l.list.Update(msg)

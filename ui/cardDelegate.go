@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"io"
-	"log"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -68,12 +67,14 @@ func (d CardDelegate) Update(msg tea.Msg, l *list.Model) tea.Cmd {
 func (d CardDelegate) Render(w io.Writer, l list.Model, index int, item list.Item) {
 	var (
 		title, desc string
+		meta        []Meta
 		s           = &d.Styles
 	)
 
 	if i, ok := item.(Item); ok {
 		title = i.Title()
 		desc = i.Description()
+		meta = i.meta
 	} else {
 		return
 	}
@@ -91,29 +92,18 @@ func (d CardDelegate) Render(w io.Writer, l list.Model, index int, item list.Ite
 		title = s.NormalTitle.Render(title)
 	}
 
-	desc = formatDescription(desc)
+	desc = formatDescription(desc, meta)
 
 	fmt.Fprintf(w, "%s\n%s", title, desc)
 }
 
-func formatDescription(desc string) string {
-	descSlice := strings.Split(desc, " ")
-	if len(descSlice[2]) == 0 {
-		return desc
-	}
-
-	labels := strings.Split(descSlice[2], ",")
+func formatDescription(desc string, meta []Meta) string {
 	var labelID []string
 	var labelColor []string
-	for _, label := range labels {
-		splitLabel := strings.Split(label, "#")
-		labelID = append(labelID, splitLabel[0])
-		labelColor = append(labelColor, splitLabel[1])
+	for _, m := range meta {
+		labelID = append(labelID, strings.ToUpper(m.initial))
+		labelColor = append(labelColor, m.color)
 	}
-	if len(labelID) != len(labelColor) {
-		log.Println("Labels and colors don't match")
-	}
-
 	labelout := ""
 	for i := 0; i < len(labelID); i++ {
 		style := lipgloss.NewStyle().Foreground(lipgloss.Color(labelColor[i]))
@@ -121,6 +111,5 @@ func formatDescription(desc string) string {
 		labelout += styled
 	}
 
-	return descSlice[0] + " " + descSlice[1] + " " + labelout
-
+	return desc + " " + labelout
 }

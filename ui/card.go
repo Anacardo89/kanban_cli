@@ -39,7 +39,13 @@ func OpenCard(kc *kanban.Card) Card {
 		cursor:   0,
 	}
 	c.setupLists()
+	c.setTxtArea()
 	return c
+}
+
+func (c *Card) UpdateCard() {
+	c.setupLists()
+	c.setTxtArea()
 }
 
 func (c Card) Init() tea.Cmd {
@@ -88,7 +94,18 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "enter":
 			c.setInput()
-			c.handleEnter()
+			switch c.cursor {
+			case titlePos:
+				c.Input.field.Focus()
+			case descPos:
+				c.textarea.Focus()
+			case checkPos:
+				checkitem := c.getCheckItem()
+				checkitem.CheckCheckItem()
+				c.setupLists()
+			case labelPos:
+				return c, func() tea.Msg { return label }
+			}
 		}
 	}
 
@@ -227,17 +244,4 @@ func (c *Card) handleDelete() {
 		c.card.RemoveLabel(cardlabel)
 	}
 	c.setupLists()
-}
-
-func (c *Card) handleEnter() {
-	switch c.cursor {
-	case titlePos:
-		c.Input.field.Focus()
-	case descPos:
-		c.textarea.Focus()
-	case checkPos:
-		checkitem := c.getCheckItem()
-		checkitem.CheckCheckItem()
-		c.setupLists()
-	}
 }

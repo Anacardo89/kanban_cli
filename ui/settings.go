@@ -23,8 +23,11 @@ func updateWindowSize(msg tea.WindowSizeMsg) {
 var (
 	BLACK                 = lipgloss.Color("#000000")
 	WHITE                 = lipgloss.Color("#ffffff")
+	RED                   = lipgloss.Color("#ba3525")
+	BLUE                  = lipgloss.Color("#77ccee")
+	YELLOW                = lipgloss.Color("#fecc00")
+	GREEN                 = lipgloss.Color("#0edd1e")
 	DefaultBorderColor    = lipgloss.Color("#fc5603")
-	ListItemColor         = lipgloss.Color("#ffffff")
 	SelectedListItemColor = lipgloss.Color("#e9f542")
 	DoneItemColor         = lipgloss.Color("#0ff702")
 )

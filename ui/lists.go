@@ -14,13 +14,20 @@ import (
 // List
 // Implement list.Item interface
 
+type Meta struct {
+	initial string
+	color   string
+}
+
 type Item struct {
 	title       string
 	description string
+	meta        []Meta
 }
 
 func (i Item) Title() string       { return i.title }
 func (i Item) Description() string { return i.description }
+func (i Item) Meta() []Meta        { return i.meta }
 func (i Item) FilterValue() string { return i.title }
 
 // Define item delegates
@@ -35,7 +42,7 @@ func setMenuItemDelegate() {
 	NoDescDelegate = list.NewDefaultDelegate()
 	NoDescDelegate.ShowDescription = false
 	NoDescDelegate.SetSpacing(0)
-	NoDescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	NoDescDelegate.Styles.NormalTitle.Foreground(WHITE)
 	NoDescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
 		Border(lipgloss.HiddenBorder(), false, false, false, true)
 }
@@ -44,7 +51,7 @@ func setBoardItemDelegate() {
 	DescDelegate = list.NewDefaultDelegate()
 	DescDelegate.ShowDescription = true
 	DescDelegate.SetSpacing(0)
-	DescDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	DescDelegate.Styles.NormalTitle.Foreground(WHITE)
 	DescDelegate.Styles.NormalDesc = DescDelegate.Styles.NormalTitle.Copy()
 	DescDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
 		Border(lipgloss.HiddenBorder(), false, false, false, true)
@@ -54,7 +61,7 @@ func setBoardItemDelegate() {
 func setLabelItemDelegate() {
 	LabelDelegate = NewLabelListDelegate()
 	LabelDelegate.ShowDescription = true
-	LabelDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	LabelDelegate.Styles.NormalTitle.Foreground(WHITE)
 	LabelDelegate.Styles.NormalDesc = LabelDelegate.Styles.NormalTitle.Copy()
 	LabelDelegate.Styles.SelectedTitle.Foreground(SelectedListItemColor).
 		Border(lipgloss.HiddenBorder(), false, false, false, true)
@@ -63,7 +70,7 @@ func setLabelItemDelegate() {
 
 func setMoveDelegate() {
 	TopWhiteDelegate = list.NewDefaultDelegate()
-	TopWhiteDelegate.Styles.NormalTitle.Foreground(ListItemColor)
+	TopWhiteDelegate.Styles.NormalTitle.Foreground(WHITE)
 	TopWhiteDelegate.Styles.SelectedTitle.
 		Foreground(SelectedListItemColor).
 		Padding(0, 0, 0, 2).
@@ -75,7 +82,6 @@ func setMoveDelegate() {
 }
 
 // Menu
-
 func (m *Menu) setupList() {
 	var (
 		node      *dll.Node
@@ -108,6 +114,7 @@ func (p *Project) setupBoards() {
 		label       *kanban.Label
 		items       []list.Item
 		placeholder interface{}
+		metaSlice   []Meta
 	)
 	node, _ = p.project.Boards.HeadNode()
 	if node == nil {
@@ -115,7 +122,7 @@ func (p *Project) setupBoards() {
 	}
 	board := node.Val().(*kanban.Board)
 	for i := 0; i < p.project.Boards.Length(); i++ {
-		b := list.New([]list.Item{}, DescDelegate, ws.width/3, ws.height-9)
+		b := list.New([]list.Item{}, NewCardDelegate(), ws.width/3, ws.height-9)
 		b.SetShowHelp(false)
 		b.Title = board.Title
 		b.InfiniteScrolling = true
@@ -123,12 +130,17 @@ func (p *Project) setupBoards() {
 			cardNode, err = board.Cards.WalkTo(j)
 			if err != nil {
 				log.Println(err)
+				err = nil
 			}
 			c := cardNode.Val().(*kanban.Card)
 			checkTotal := c.CheckList.Length()
 			checkDone := 0
 			for k := 0; k < checkTotal; k++ {
 				placeholder, err = c.CheckList.GetAt(k)
+				if err != nil {
+					log.Println(err)
+					err = nil
+				}
 				checkitem = placeholder.(*kanban.CheckItem)
 				if checkitem.Check {
 					checkDone++
@@ -136,22 +148,29 @@ func (p *Project) setupBoards() {
 			}
 
 			labelLen := c.CardLabels.Length()
-			activeLabels := ""
+
 			for k := 0; k < labelLen; k++ {
 				placeholder, err = c.CardLabels.GetAt(k)
+				if err != nil {
+					log.Println(err)
+					err = nil
+				}
 				label = placeholder.(*kanban.Label)
-				labelInfo := string(label.Title[0]) + label.Color
-				activeLabels += labelInfo + ","
+				meta := Meta{
+					initial: string(label.Title[0]),
+					color:   label.Color,
+				}
+				metaSlice = append(metaSlice, meta)
 			}
 
 			item := Item{
 				title: c.Title,
-				description: fmt.Sprintf("[✓]%s/%s %sL %s",
+				description: fmt.Sprintf("[✓]%s/%s %sL",
 					strconv.Itoa(checkDone),
 					strconv.Itoa(checkTotal),
 					strconv.Itoa(labelLen),
-					activeLabels,
 				),
+				meta: metaSlice,
 			}
 			items = append(items, item)
 			b.SetItems(items)
@@ -223,7 +242,7 @@ func (c *Card) setupLists() {
 	ll.InfiniteScrolling = true
 	for i := 0; i < c.card.CardLabels.Length(); i++ {
 		node, _ = c.card.CardLabels.WalkTo(i)
-		label := node.Val().(*kanban.CheckItem)
+		label := node.Val().(*kanban.Label)
 		item := Item{
 			title: label.Title,
 		}
