@@ -61,6 +61,11 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			c.Input.field, cmd = c.Input.field.Update(msg)
 			return c, cmd
 		}
+		if c.textarea.Focused() {
+			c.handleTextArea(msg.String())
+			c.textarea, cmd = c.textarea.Update(msg)
+			return c, cmd
+		}
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return c, tea.Quit

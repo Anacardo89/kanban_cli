@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/Anacardo89/ds/lists/dll"
 	"github.com/Anacardo89/kanban_cli/kanban"
@@ -98,11 +100,14 @@ func (m *Menu) setupList() {
 // Project
 func (p *Project) setupBoards() {
 	var (
-		err      error
-		boards   []list.Model
-		node     *dll.Node
-		cardNode *dll.Node
-		items    []list.Item
+		err         error
+		boards      []list.Model
+		node        *dll.Node
+		cardNode    *dll.Node
+		checkitem   *kanban.CheckItem
+		label       *kanban.Label
+		items       []list.Item
+		placeholder interface{}
 	)
 	node, _ = p.project.Boards.HeadNode()
 	if node == nil {
@@ -120,8 +125,33 @@ func (p *Project) setupBoards() {
 				log.Println(err)
 			}
 			c := cardNode.Val().(*kanban.Card)
+			checkTotal := c.CheckList.Length()
+			checkDone := 0
+			for k := 0; k < checkTotal; k++ {
+				placeholder, err = c.CheckList.GetAt(k)
+				checkitem = placeholder.(*kanban.CheckItem)
+				if checkitem.Check {
+					checkDone++
+				}
+			}
+
+			labelLen := c.CardLabels.Length()
+			activeLabels := ""
+			for k := 0; k < labelLen; k++ {
+				placeholder, err = c.CardLabels.GetAt(k)
+				label = placeholder.(*kanban.Label)
+				labelInfo := string(label.Title[0]) + label.Color
+				activeLabels += labelInfo + ","
+			}
+
 			item := Item{
 				title: c.Title,
+				description: fmt.Sprintf("[✓]%s/%s %sL %s",
+					strconv.Itoa(checkDone),
+					strconv.Itoa(checkTotal),
+					strconv.Itoa(labelLen),
+					activeLabels,
+				),
 			}
 			items = append(items, item)
 			b.SetItems(items)
