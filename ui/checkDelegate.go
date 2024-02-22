@@ -19,7 +19,7 @@ type CheckItemStyles struct {
 
 func NewCheckItemStyles() (s CheckItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
-		Foreground(ListItemColor)
+		Foreground(WHITE)
 	s.NormalDoneTitle = lipgloss.NewStyle().
 		Foreground(DoneItemColor).
 		Strikethrough(true)

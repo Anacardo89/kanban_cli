@@ -21,7 +21,7 @@ type LabelItemStyles struct {
 
 func NewLabelItemStyles() (s LabelItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
-		Foreground(ListItemColor)
+		Foreground(WHITE)
 	s.NormalDesc = s.NormalTitle.Copy().
 		Foreground(BLACK)
 	s.SelectedTitle = lipgloss.NewStyle().

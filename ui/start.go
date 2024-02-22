@@ -20,6 +20,8 @@ const (
 	upNone updateFlag = iota
 	upMenu
 	upProject
+	upLabel
+	upCard
 )
 
 const (
@@ -42,12 +44,16 @@ type Model struct {
 	card    Card
 	sc      *kanban.Card
 	label   Label
+	sl      *kanban.Label
 }
 
 func New() Model {
 	return Model{
 		state: menu,
 		menu:  NewMenu(),
+		sp:    nil,
+		sc:    nil,
+		sl:    nil,
 	}
 }
 
@@ -81,14 +87,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.update = upNone
 		m.project.UpdateProject()
 		return m, func() tea.Msg { return project }
+	case upLabel:
+		if m.sc == nil {
+			return m, nil
+		}
+		m.update = upNone
+		m.sl = m.label.getLabel()
+		m.sc.AddLabel(m.sl)
+		m.sl = nil
+		return m, func() tea.Msg { return upCard }
+	case upCard:
+		m.update = upNone
+		m.card.UpdateCard()
+		return m, func() tea.Msg { return card }
 	}
 
 	switch m.state {
 	case menu:
+		m.sp = nil
+		m.sc = nil
 		updatedMenu, cmd := m.menu.Update(msg)
 		m.menu = updatedMenu.(Menu)
 		return m, cmd
 	case project:
+		m.sc = nil
 		if m.sp != m.menu.getProject() {
 			m.sp = m.menu.getProject()
 			m.project = OpenProject(m.sp)
