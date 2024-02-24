@@ -108,7 +108,7 @@ func (l *Label) ChangeColor(color string) {
 }
 
 // Board
-func (b *Board) RenameList(title string) {
+func (b *Board) RenameBoard(title string) {
 	b.Title = title
 }
 

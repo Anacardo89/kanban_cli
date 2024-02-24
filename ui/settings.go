@@ -51,6 +51,13 @@ func (i Item) Description() string { return i.description }
 func (i Item) FilterValue() string { return i.title }
 func (i Item) Meta() []Meta        { return i.meta }
 
+// output strings
+const (
+	PROJECT_TITLE = "Project Title"
+	BOARD_TITLE   = "Board Title"
+	CARD_TITLE    = "Card Title"
+)
+
 // Colors
 var (
 	BLACK              = lipgloss.Color("#000000")
@@ -97,6 +104,9 @@ func updateStyles() {
 		MarginTop(1).
 		Padding(1, 3).
 		Bold(true)
+
+	SelectedTxtStyle = lipgloss.NewStyle().
+		Foreground(YELLOW)
 
 	InputFieldStyle = lipgloss.NewStyle().
 		BorderForeground(DefaultBorderColor).
@@ -151,7 +161,7 @@ func updateStyles() {
 		Bold(true)
 
 	ProjectListSelectedStyle = ProjectListStyle.Copy().
-		BorderForeground()
+		BorderForeground(WHITE)
 
 	ProjectTitle = lipgloss.NewStyle().
 		Align(lipgloss.Center).
