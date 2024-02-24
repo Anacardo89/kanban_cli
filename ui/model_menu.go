@@ -13,7 +13,6 @@ import (
 // Implements tea.Model
 type Menu struct {
 	menu      *kanban.Menu
-	cursor    int
 	list      list.Model
 	textinput textinput.Model
 	empty     bool
@@ -35,7 +34,6 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 	m.list, cmd = m.list.Update(msg)
-	m.cursor = m.list.Cursor()
 	return m, cmd
 }
 
@@ -52,7 +50,6 @@ func (m Menu) View() string {
 // **************************************
 func TestData() Menu {
 	return Menu{
-		cursor:    0,
 		menu:      kanban.TestData(),
 		textinput: textinput.New(),
 	}
@@ -81,7 +78,7 @@ func (m *Menu) getProject() *kanban.Project {
 	if m.empty {
 		return nil
 	}
-	project, err := m.menu.Projects.GetAt(m.cursor)
+	project, err := m.menu.Projects.GetAt(m.list.Cursor())
 	if err != nil {
 		log.Println(err)
 	}
@@ -134,7 +131,6 @@ func (m *Menu) txtInputEnter() {
 	m.setList()
 	m.textinput.SetValue("")
 	m.textinput.Blur()
-	m.cursor = m.list.Cursor()
 }
 
 // actions
@@ -143,7 +139,7 @@ func (m *Menu) deleteProject() {
 	if m.empty {
 		return
 	}
-	project, err := m.menu.Projects.GetAt(m.cursor)
+	project, err := m.menu.Projects.GetAt(m.list.Cursor())
 	if err != nil {
 		log.Println(err)
 		return
@@ -156,7 +152,6 @@ func (m *Menu) deleteProject() {
 		m.empty = true
 	}
 	m.setList()
-	m.cursor = m.list.Cursor()
 }
 
 // View

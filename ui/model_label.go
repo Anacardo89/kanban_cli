@@ -41,7 +41,6 @@ func (l Label) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return l, cmd
 	}
 	l.list, cmd = l.list.Update(msg)
-	l.cursor = l.list.Cursor()
 	return l, cmd
 }
 
@@ -49,7 +48,7 @@ func (l Label) View() string {
 	if ws.width == 0 {
 		return "loading..."
 	}
-	if l.project.Labels.Length() == 0 {
+	if l.empty {
 		return l.viewEmpty()
 	}
 	return l.viewLabels()
@@ -63,13 +62,16 @@ func OpenLabels(kp *kanban.Project) Label {
 		cursor:    0,
 		flag:      none,
 	}
+	if l.project.Labels.Length() == 0 {
+		l.empty = true
+	}
 	l.setTxtInput()
 	l.setList()
 	return l
 }
 
 func (l *Label) getLabel() *kanban.Label {
-	if l.project.Labels.Length() == 0 {
+	if l.empty {
 		return nil
 	}
 	label, err := l.project.Labels.GetAt(l.list.Cursor())
@@ -90,16 +92,25 @@ func (l *Label) keyPress(msg tea.KeyMsg) tea.Cmd {
 	case "ctrl+c", "q":
 		return tea.Quit
 	case "enter":
-		return func() tea.Msg { return upLabel }
+		if l.empty {
+			return nil
+		} else {
+			return func() tea.Msg { return upLabel }
+		}
 	case "b", "esc":
-		return func() tea.Msg { return projectState }
+		return func() tea.Msg { return upProject }
 	case "n":
 		l.flag = title
 		l.textinput.Placeholder = "Label Title"
 		return l.textinput.Focus()
 	case "d":
-		l.deleteLabelFromCards()
-		l.deleteLabel()
+		label, err := l.project.Labels.GetAt(l.list.Cursor())
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		l.deleteLabelFromCards(label.(*kanban.Label))
+		l.deleteLabel(label.(*kanban.Label))
 		return nil
 	}
 	l.list, cmd = l.list.Update(msg)
@@ -141,6 +152,7 @@ func (l *Label) txtInputEnter() {
 			return
 		}
 		l.project.AddLabel(tmpTitle, tmpColor)
+		l.empty = false
 		l.setList()
 		l.textinput.SetValue("")
 		l.textinput.Blur()
@@ -149,37 +161,28 @@ func (l *Label) txtInputEnter() {
 }
 
 // actions
-func (l *Label) deleteLabel() {
+func (l *Label) deleteLabel(label *kanban.Label) {
 	var err error
 	if l.empty {
 		return
 	}
-	label, err := l.project.Labels.GetAt(l.cursor)
+	err = l.project.RemoveLabel(label)
 	if err != nil {
 		log.Println(err)
-		return
 	}
-	err = l.project.RemoveLabel(label.(*kanban.Label))
-	if err != nil {
-		log.Println(err)
+	if l.project.Labels.Length() == 0 {
+		l.empty = true
 	}
 	l.setList()
-	l.cursor = l.list.Cursor()
 }
 
-func (l *Label) deleteLabelFromCards() {
-	var err error
+func (l *Label) deleteLabelFromCards(label *kanban.Label) {
 	if l.empty {
-		return
-	}
-	label, err := l.project.Labels.GetAt(l.cursor)
-	if err != nil {
-		log.Println(err)
 		return
 	}
 	cards := l.getAllCards()
 	for _, card := range cards {
-		card.RemoveLabel(label.(*kanban.Label))
+		card.RemoveLabel(label)
 	}
 }
 
