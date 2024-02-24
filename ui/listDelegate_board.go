@@ -24,7 +24,7 @@ func NewCardStyles() (s CardStyles) {
 		Foreground(WHITE)
 	s.NormalDesc = lipgloss.NewStyle()
 	s.SelectedTitle = lipgloss.NewStyle().
-		Foreground(SelectedListItemColor)
+		Foreground(YELLOW)
 	s.SelectedDesc = lipgloss.NewStyle()
 	return s
 }
