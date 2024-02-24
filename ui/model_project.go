@@ -507,6 +507,8 @@ func (p *Project) inputStyled() string {
 		return InputNoFieldStyle.Render("Create new: [B]oard or [C]ard")
 	case rename:
 		return InputNoFieldStyle.Render("Rename: [P]roject or [B]oard")
+	case delete:
+		return InputNoFieldStyle.Render("Delete: [B]oard or [C]ard")
 	case board:
 		return InputNoFieldStyle.Render("Use [Left] and [Right] to move highlighted board. [Enter] to confirm position")
 	}

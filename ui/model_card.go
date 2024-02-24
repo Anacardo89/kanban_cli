@@ -78,8 +78,9 @@ func OpenCard(kc *kanban.Card) Card {
 }
 
 func (c *Card) UpdateCard() {
-	c.setLists()
+	c.setInput()
 	c.setTxtArea()
+	c.setLists()
 }
 
 func (c *Card) getCheckItem() *kanban.CheckItem {
@@ -131,20 +132,8 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 	case "esc":
 		return func() tea.Msg { return upProject }
 	case "enter":
-		c.setInput()
-		switch c.cursor {
-		case titlePos:
-			c.textinput.Placeholder = "Card Title"
-			c.textinput.Focus()
-		case descPos:
-			c.textarea.Focus()
-		case checkPos:
-			checkitem := c.getCheckItem()
-			checkitem.CheckCheckItem()
-			c.setLists()
-		case labelPos:
-			return func() tea.Msg { return labelState }
-		}
+		cmd = c.enterKeyPress()
+		return cmd
 	case "n":
 		if c.cursor == checkPos {
 			c.textinput.Placeholder = "CheckItem Title"
@@ -161,7 +150,7 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 	} else if c.cursor == labelPos {
 		c.labels, cmd = c.labels.Update(msg)
 	}
-	return nil
+	return cmd
 }
 
 func (c *Card) inputFocused(msg tea.KeyMsg) tea.Cmd {
@@ -193,6 +182,26 @@ func (c *Card) txtInputEnter() {
 	c.textinput.SetValue("")
 	c.textinput.Blur()
 	c.flag = none
+}
+
+func (c *Card) enterKeyPress() tea.Cmd {
+	switch c.cursor {
+	case titlePos:
+		c.textinput.Placeholder = "Card Title"
+		c.textinput.Focus()
+	case descPos:
+		c.textarea.Focus()
+	case checkPos:
+		if c.card.CheckList.Length() == 0 {
+			return nil
+		}
+		checkitem := c.getCheckItem()
+		checkitem.CheckCheckItem()
+		c.setLists()
+	case labelPos:
+		return func() tea.Msg { return labelState }
+	}
+	return nil
 }
 
 // actions
