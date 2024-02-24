@@ -226,17 +226,11 @@ func (c *Card) handleMoveLeft() {
 func (c *Card) handleDelete() {
 	switch c.cursor {
 	case checkPos:
-		ci, err := c.card.CheckList.GetAt(c.checklist.Cursor())
-		if err != nil {
-			log.Println(err)
-		}
-		c.card.RemoveCheckItem(ci.(*kanban.CheckItem))
+		ci := c.getCheckItem()
+		c.card.RemoveCheckItem(ci)
 	case labelPos:
-		l, err := c.card.CardLabels.GetAt(c.labels.Cursor())
-		if err != nil {
-			log.Println(err)
-		}
-		c.card.RemoveLabel(l.(*kanban.Label))
+		l := c.getCardLabel()
+		c.card.RemoveLabel(l)
 	}
 	c.setLists()
 }

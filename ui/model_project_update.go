@@ -38,24 +38,15 @@ func (p *Project) txtInputEnter() {
 		p.emptyBoard = append(p.emptyBoard, true)
 		p.cursor = 0
 	case card:
-		board, err := p.project.Boards.GetAt(p.cursor)
-		if err != nil {
-			log.Println(err)
-			err = nil
-			return
-		}
-		board.(*kanban.Board).AddCard(p.textinput.Value())
+		b := p.getBoard()
+		b.AddCard(p.textinput.Value())
 		p.emptyBoard[p.cursor] = false
 	case rename:
 		if strings.Contains(p.textinput.Placeholder, "Project") {
 			p.project.RenameProject(p.textinput.Value())
 		} else {
-			b, err := p.project.Boards.GetAt(p.cursor)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			b.(*kanban.Board).RenameBoard(p.textinput.Value())
+			b := p.getBoard()
+			b.RenameBoard(p.textinput.Value())
 		}
 	}
 	p.flag = none
@@ -263,12 +254,8 @@ func (p *Project) moveRight() {
 
 // move
 func (p *Project) moveBoardLeft() {
-	b, err := p.project.Boards.GetAt(p.cursor)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	bVal := *b.(*kanban.Board)
+	b := p.getBoard()
+	bVal := *b
 	p.project.Boards.RemoveAt(p.cursor)
 	if p.cursor == 0 {
 		p.project.Boards.Append(&bVal)
@@ -281,12 +268,8 @@ func (p *Project) moveBoardLeft() {
 }
 
 func (p *Project) moveBoardRight() {
-	b, err := p.project.Boards.GetAt(p.cursor)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	bVal := *b.(*kanban.Board)
+	b := p.getBoard()
+	bVal := *b
 	p.project.Boards.RemoveAt(p.cursor)
 	if p.cursor == p.project.Boards.Length() {
 		p.project.Boards.Prepend(&bVal)
@@ -304,11 +287,7 @@ func (p *Project) moveCard() {
 		log.Println(err)
 		return
 	}
-	bt, err := p.project.Boards.GetAt(p.cursor)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	bt := p.getBoard()
 	c, err := bf.(*kanban.Board).Cards.GetAt(p.moveFrom[1])
 	if err != nil {
 		log.Println(err)
@@ -316,7 +295,7 @@ func (p *Project) moveCard() {
 	}
 	cardVal := *c.(*kanban.Card)
 	bf.(*kanban.Board).Cards.RemoveAt(p.moveFrom[1])
-	bt.(*kanban.Board).Cards.Append(&cardVal)
+	bt.Cards.Append(&cardVal)
 	p.setLists()
 }
 
@@ -325,13 +304,8 @@ func (p *Project) deleteBoard() {
 	if p.empty {
 		return
 	}
-	node, err := p.project.Boards.WalkTo(p.cursor)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	b := node.Val().(*kanban.Board)
-	err = p.project.RemoveBoard(b)
+	b := p.getBoard()
+	err := p.project.RemoveBoard(b)
 	if err != nil {
 		log.Println(err)
 	}
@@ -343,19 +317,9 @@ func (p *Project) deleteBoard() {
 }
 
 func (p *Project) deleteCard() {
-	b, err := p.project.Boards.GetAt(p.cursor)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	board := b.(*kanban.Board)
-	c, err := board.Cards.GetAt(p.boards[p.cursor].Cursor())
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	card := c.(*kanban.Card)
-	err = board.RemoveCard(card)
+	b := p.getBoard()
+	c := p.getCard()
+	err := b.RemoveCard(c)
 	if err != nil {
 		log.Println(err)
 	}
