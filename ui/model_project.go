@@ -105,6 +105,18 @@ func (p *Project) UpdateProject() {
 	p.setLists()
 }
 
+func (p *Project) getBoard() *kanban.Board {
+	if p.empty {
+		return nil
+	}
+	board, err := p.project.Boards.GetAt(p.cursor)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return board.(*kanban.Board)
+}
+
 func (p *Project) getCard() *kanban.Card {
 	if p.empty {
 		return nil
