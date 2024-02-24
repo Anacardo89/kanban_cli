@@ -24,9 +24,9 @@ func NewCheckItemStyles() (s CheckItemStyles) {
 		Foreground(DoneItemColor).
 		Strikethrough(true)
 	s.SelectedTitle = lipgloss.NewStyle().
-		Foreground(SelectedListItemColor)
+		Foreground(YELLOW)
 	s.SelectedDoneTitle = lipgloss.NewStyle().
-		Foreground(SelectedListItemColor).
+		Foreground(YELLOW).
 		Strikethrough(true)
 	return s
 }

@@ -25,7 +25,7 @@ func NewLabelItemStyles() (s LabelItemStyles) {
 	s.NormalDesc = s.NormalTitle.Copy().
 		Foreground(BLACK)
 	s.SelectedTitle = lipgloss.NewStyle().
-		Foreground(SelectedListItemColor)
+		Foreground(YELLOW)
 	s.SelectedDesc = s.SelectedTitle.Copy().
 		Foreground(BLACK)
 	return s
