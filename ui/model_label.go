@@ -61,9 +61,9 @@ func OpenLabels(kp *kanban.Project) Label {
 		project:   kp,
 		textinput: textinput.New(),
 		cursor:    0,
+		flag:      none,
 	}
 	l.setTxtInput()
-	setLabelItemDelegate()
 	l.setList()
 	return l
 }
@@ -98,11 +98,12 @@ func (l *Label) keyPress(msg tea.KeyMsg) tea.Cmd {
 		l.textinput.Placeholder = "Label Title"
 		return l.textinput.Focus()
 	case "d":
+		l.deleteLabelFromCards()
 		l.deleteLabel()
 		return nil
 	}
-
-	return nil
+	l.list, cmd = l.list.Update(msg)
+	return cmd
 }
 
 func (l *Label) inputFocused(msg tea.KeyMsg) tea.Cmd {
@@ -166,6 +167,42 @@ func (l *Label) deleteLabel() {
 	l.cursor = l.list.Cursor()
 }
 
+func (l *Label) deleteLabelFromCards() {
+	var err error
+	if l.empty {
+		return
+	}
+	label, err := l.project.Labels.GetAt(l.cursor)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	cards := l.getAllCards()
+	for _, card := range cards {
+		card.RemoveLabel(label.(*kanban.Label))
+	}
+}
+
+func (l *Label) getAllCards() []*kanban.Card {
+	var cards []*kanban.Card
+	for i := 0; i < l.project.Boards.Length(); i++ {
+		b, err := l.project.Boards.GetAt(i)
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		for j := 0; j < b.(*kanban.Board).Cards.Length(); j++ {
+			c, err := b.(*kanban.Board).Cards.GetAt(j)
+			if err != nil {
+				log.Println(err)
+				return nil
+			}
+			cards = append(cards, c.(*kanban.Card))
+		}
+	}
+	return cards
+}
+
 // View
 func (l *Label) viewEmpty() string {
 	var (
@@ -222,20 +259,11 @@ func (l *Label) setTxtInput() {
 }
 
 // list
-var LabelDelegate = NewLabelListDelegate()
-
-func setLabelItemDelegate() {
-	LabelDelegate.ShowDescription = true
-	LabelDelegate.Styles.NormalTitle.Foreground(WHITE)
-	LabelDelegate.Styles.NormalDesc = LabelDelegate.Styles.NormalTitle.Copy()
-	LabelDelegate.Styles.SelectedTitle.Foreground(YELLOW).
-		Border(lipgloss.HiddenBorder(), false, false, false, true)
-	LabelDelegate.Styles.SelectedDesc = LabelDelegate.Styles.SelectedTitle.Copy()
-}
+var labelDelegate = NewLabelListDelegate()
 
 func (l *Label) setList() {
 	var labelItems []list.Item
-	lst := list.New([]list.Item{}, LabelDelegate, ws.width/3, ws.height-9)
+	lst := list.New([]list.Item{}, labelDelegate, ws.width/3, ws.height-9)
 	lst.SetShowHelp(false)
 	lst.Title = "Labels"
 	lst.InfiniteScrolling = true

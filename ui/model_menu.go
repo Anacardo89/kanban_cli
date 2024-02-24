@@ -31,10 +31,6 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.setList()
 		return m, nil
 	case tea.KeyMsg:
-		if m.textinput.Focused() {
-			cmd = m.inputFocused(msg)
-			return m, cmd
-		}
 		cmd = m.keyPress(msg)
 		return m, cmd
 	}
@@ -96,6 +92,7 @@ func (m *Menu) getProject() *kanban.Project {
 func (m *Menu) keyPress(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	if m.textinput.Focused() {
+		m.inputFocused(msg)
 		m.textinput, cmd = m.textinput.Update(msg)
 		return cmd
 	}
@@ -113,7 +110,8 @@ func (m *Menu) keyPress(msg tea.KeyMsg) tea.Cmd {
 		m.deleteProject()
 		return nil
 	}
-	return nil
+	m.list, cmd = m.list.Update(msg)
+	return cmd
 }
 
 func (m *Menu) inputFocused(msg tea.KeyMsg) tea.Cmd {

@@ -21,10 +21,12 @@ type LabelItemStyles struct {
 
 func NewLabelItemStyles() (s LabelItemStyles) {
 	s.NormalTitle = lipgloss.NewStyle().
+		MarginLeft(2).
 		Foreground(WHITE)
 	s.NormalDesc = s.NormalTitle.Copy().
 		Foreground(BLACK)
 	s.SelectedTitle = lipgloss.NewStyle().
+		MarginLeft(2).
 		Foreground(YELLOW)
 	s.SelectedDesc = s.SelectedTitle.Copy().
 		Foreground(BLACK)
@@ -101,8 +103,8 @@ func (d LabelListDelegate) Render(w io.Writer, l list.Model, index int, item lis
 		desc = s.SelectedDesc.Background(lipgloss.Color(desc)).Render(desc)
 	} else {
 		title = s.NormalTitle.Render(title)
+		desc = s.NormalDesc.Background(lipgloss.Color(desc)).Render(desc)
 	}
-	desc = s.NormalDesc.Background(lipgloss.Color(desc)).Render(desc)
 
 	fmt.Fprintf(w, "%s\n%s", title, desc)
 }

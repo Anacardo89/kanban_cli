@@ -43,18 +43,6 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		c.setLists()
 		return c, nil
 	case tea.KeyMsg:
-		if c.textinput.Focused() {
-			cmd = c.inputFocused(msg)
-			return c, cmd
-		}
-		if c.textarea.Focused() {
-			switch msg.String() {
-			case "esc":
-				c.textarea.Blur()
-			}
-			c.textarea, cmd = c.textarea.Update(msg)
-			return c, cmd
-		}
 		cmd = c.keyPress(msg)
 		return c, cmd
 	}
@@ -81,6 +69,7 @@ func OpenCard(kc *kanban.Card) Card {
 		textinput: textinput.New(),
 		textarea:  textarea.New(),
 		cursor:    0,
+		flag:      none,
 	}
 	c.setInput()
 	c.setTxtArea()
@@ -118,38 +107,20 @@ func (c *Card) getCardLabel() *kanban.Label {
 }
 
 // Update
-func (c *Card) inputFocused(msg tea.KeyMsg) tea.Cmd {
-	var cmd tea.Cmd
-	switch msg.String() {
-	case "esc":
-		c.textinput.SetValue("")
-		c.textinput.Blur()
-		c.flag = none
-		return nil
-	case "enter":
-		c.txtInputEnter()
-	}
-	c.textinput, cmd = c.textinput.Update(msg)
-	return cmd
-}
-
-func (c *Card) txtInputEnter() {
-	if c.textinput.Value() == "" {
-		return
-	}
-	switch c.cursor {
-	case 0:
-		c.card.RenameCard(c.textinput.Value())
-	case 2:
-		c.card.AddCheckItem(c.textinput.Value())
-	}
-	c.setLists()
-	c.textinput.SetValue("")
-	c.textinput.Blur()
-	c.flag = none
-}
-
 func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	if c.textinput.Focused() {
+		cmd = c.inputFocused(msg)
+		return cmd
+	}
+	if c.textarea.Focused() {
+		switch msg.String() {
+		case "esc":
+			c.textarea.Blur()
+		}
+		c.textarea, cmd = c.textarea.Update(msg)
+		return cmd
+	}
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit
@@ -185,7 +156,43 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 			c.handleDelete()
 		}
 	}
+	if c.cursor == checkPos {
+		c.checklist, cmd = c.checklist.Update(msg)
+	} else if c.cursor == labelPos {
+		c.labels, cmd = c.labels.Update(msg)
+	}
 	return nil
+}
+
+func (c *Card) inputFocused(msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg.String() {
+	case "esc":
+		c.textinput.SetValue("")
+		c.textinput.Blur()
+		c.flag = none
+		return nil
+	case "enter":
+		c.txtInputEnter()
+	}
+	c.textinput, cmd = c.textinput.Update(msg)
+	return cmd
+}
+
+func (c *Card) txtInputEnter() {
+	if c.textinput.Value() == "" {
+		return
+	}
+	switch c.cursor {
+	case 0:
+		c.card.RenameCard(c.textinput.Value())
+	case 2:
+		c.card.AddCheckItem(c.textinput.Value())
+	}
+	c.setLists()
+	c.textinput.SetValue("")
+	c.textinput.Blur()
+	c.flag = none
 }
 
 // actions

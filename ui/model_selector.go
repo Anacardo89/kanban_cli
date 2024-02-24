@@ -107,7 +107,7 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 		return func() tea.Msg { return projectState }
 	case upLabel:
 		if s.sc == nil {
-			return nil
+			return func() tea.Msg { return labelState }
 		}
 		s.update = upNone
 		s.sl = s.label.getLabel()
@@ -117,7 +117,7 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 	case upCard:
 		s.update = upNone
 		s.card.UpdateCard()
-		return func() tea.Msg { return card }
+		return func() tea.Msg { return cardState }
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/charmbracelet/bubbles/list"
@@ -16,13 +17,12 @@ import (
 type Project struct {
 	project    *kanban.Project
 	boards     []list.Model
-	noBoards   bool
+	empty      bool
 	emptyBoard []bool
 	cursor     int
 	moveFrom   []int
 	textinput  textinput.Model
 	flag       actionFlag
-	empty      bool
 }
 
 func (p Project) Init() tea.Cmd {
@@ -48,7 +48,7 @@ func (p Project) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = p.keyPress(msg)
 		return p, cmd
 	}
-	if !p.noBoards {
+	if !p.empty {
 		p.boards[p.cursor], cmd = p.boards[p.cursor].Update(msg)
 	}
 	return p, cmd
@@ -58,7 +58,7 @@ func (p Project) View() string {
 	if ws.width == 0 {
 		return "loading..."
 	}
-	if p.noBoards {
+	if p.empty {
 		return p.viewEmpty()
 	}
 	return p.viewBoards()
@@ -71,22 +71,46 @@ func OpenProject(kp *kanban.Project) Project {
 		project:   kp,
 		cursor:    0,
 		moveFrom:  []int{-1, 0},
+		flag:      none,
 	}
+	p.setEmptyBoard()
 	p.setInput()
 	setMoveDelegate()
 	p.setLists()
 	return p
 }
 
+func (p *Project) setEmptyBoard() {
+	var emptyBoard []bool
+	if p.project.Boards.Length() == 0 {
+		p.empty = true
+	}
+	for i := 0; i < p.project.Boards.Length(); i++ {
+		p.empty = false
+		b, err := p.project.Boards.GetAt(i)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if b.(*kanban.Board).Cards.Length() == 0 {
+			emptyBoard = append(emptyBoard, true)
+		} else {
+			emptyBoard = append(emptyBoard, false)
+		}
+	}
+	p.emptyBoard = emptyBoard
+}
+
 func (p *Project) UpdateProject() {
+	p.setEmptyBoard()
 	p.setLists()
 }
 
 func (p *Project) getCard() *kanban.Card {
-	if p.noBoards {
+	if p.empty {
 		return nil
 	}
-	if len(p.boards[p.cursor].Items()) == 0 {
+	if p.emptyBoard[p.cursor] {
 		return nil
 	}
 	board, err := p.project.Boards.GetAt(p.cursor)
@@ -129,7 +153,7 @@ func (p *Project) txtInputEnter() {
 		if p.empty {
 			p.empty = false
 		}
-		p.setLists()
+		p.emptyBoard = append(p.emptyBoard, true)
 		p.cursor = 0
 	case card:
 		board, err := p.project.Boards.GetAt(p.cursor)
@@ -139,10 +163,21 @@ func (p *Project) txtInputEnter() {
 			return
 		}
 		board.(*kanban.Board).AddCard(p.textinput.Value())
-		p.setLists()
+		p.emptyBoard[p.cursor] = false
 	case rename:
-		p.project.RenameProject(p.textinput.Value())
+		if strings.Contains(p.textinput.Placeholder, "Project") {
+			p.project.RenameProject(p.textinput.Value())
+		} else {
+			b, err := p.project.Boards.GetAt(p.cursor)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			b.(*kanban.Board).RenameBoard(p.textinput.Value())
+		}
 	}
+	p.flag = none
+	p.setLists()
 	p.textinput.SetValue("")
 	p.textinput.Blur()
 }
@@ -151,18 +186,33 @@ func (p *Project) txtInputEnter() {
 func (p *Project) checkFlag(msg tea.KeyMsg) tea.Cmd {
 	switch p.flag {
 	case new:
-		switch msg.String() {
-		case "b":
-			p.textinput.Placeholder = "Board Title"
-		case "c":
-			p.textinput.Placeholder = "Card Title"
+		if p.empty {
+			p.textinput.Placeholder = BOARD_TITLE
+			return p.textinput.Focus()
+		} else {
+			switch msg.String() {
+			case "b":
+				p.flag = board
+				p.textinput.Placeholder = BOARD_TITLE
+				return p.textinput.Focus()
+			case "c":
+				p.flag = card
+				p.textinput.Placeholder = CARD_TITLE
+				return p.textinput.Focus()
+			}
 		}
-		return p.textinput.Focus()
 	case move:
 		p.moveLogic(msg)
 	case rename:
-		p.textinput.Placeholder = "Project Title"
-		return p.textinput.Focus()
+		switch msg.String() {
+		case "p":
+			p.textinput.Placeholder = PROJECT_TITLE
+			return p.textinput.Focus()
+		case "b":
+			p.textinput.Placeholder = BOARD_TITLE
+			return p.textinput.Focus()
+		}
+
 	case delete:
 		switch msg.String() {
 		case "b":
@@ -231,16 +281,23 @@ func (p *Project) keyPress(msg tea.KeyMsg) tea.Cmd {
 	case "l":
 		return func() tea.Msg { return labelState }
 	case "enter":
+		if p.empty {
+			return nil
+		}
 		if p.emptyBoard[p.cursor] {
 			return nil
 		}
 		return func() tea.Msg { return cardState }
-
 	case "esc":
 		return func() tea.Msg { return upMenu }
 	case "n":
-		p.flag = new
-		return nil
+		if p.empty {
+			p.flag = board
+			return p.textinput.Focus()
+		} else {
+			p.flag = new
+			return nil
+		}
 	case "m":
 		p.flag = move
 		return nil
@@ -252,13 +309,14 @@ func (p *Project) keyPress(msg tea.KeyMsg) tea.Cmd {
 		return nil
 
 	}
-	return nil
+	p.boards[p.cursor], cmd = p.boards[p.cursor].Update(msg)
+	return cmd
 }
 
 // actions
 // movement
 func (p *Project) moveLeft() {
-	if p.noBoards {
+	if p.empty {
 		return
 	}
 	if p.cursor == 0 {
@@ -269,7 +327,7 @@ func (p *Project) moveLeft() {
 }
 
 func (p *Project) moveRight() {
-	if p.noBoards {
+	if p.empty {
 		return
 	}
 	if p.cursor == p.project.Boards.Length()-1 {
@@ -340,7 +398,7 @@ func (p *Project) moveCard() {
 
 // delete
 func (p *Project) deleteBoard() {
-	if p.project.Boards.Length() == 0 {
+	if p.empty {
 		return
 	}
 	node, err := p.project.Boards.WalkTo(p.cursor)
@@ -392,7 +450,7 @@ func (p *Project) viewEmpty() string {
 	)
 	if p.textinput.Focused() {
 		_, h := lipgloss.Size(emptyTxtStyled)
-		for i := 0; i < ws.height-h-h/2; i++ {
+		for i := 0; i < ws.height-h-h/2-1; i++ {
 			bottomLines += "\n"
 		}
 		inputStyled = InputFieldStyle.Render(p.textinput.View())
@@ -443,17 +501,14 @@ func (p *Project) inputStyled() string {
 		return InputNoFieldStyle.Render("Move: [B]oard or [C]ard")
 	} else if p.flag == move && p.moveFrom[0] != -1 {
 		return InputNoFieldStyle.Render("Press [Enter] to append Card to Board or [Esc] to go back")
-	} else {
-		switch p.flag {
-		case new:
-			return InputNoFieldStyle.Render(
-				"Create new: [B]oard or [C]ard",
-			)
-		case board:
-			return InputNoFieldStyle.Render(
-				"Use [Left] and [Right] to move highlighted board. [Enter] to confirm position",
-			)
-		}
+	}
+	switch p.flag {
+	case new:
+		return InputNoFieldStyle.Render("Create new: [B]oard or [C]ard")
+	case rename:
+		return InputNoFieldStyle.Render("Rename: [P]roject or [B]oard")
+	case board:
+		return InputNoFieldStyle.Render("Use [Left] and [Right] to move highlighted board. [Enter] to confirm position")
 	}
 	return ""
 }
@@ -491,13 +546,11 @@ func (p *Project) setLists() {
 	var boards []list.Model
 	board := node.Val().(*kanban.Board)
 	for i := 0; i < p.project.Boards.Length(); i++ {
-		l := list.New([]list.Item{}, cardDelegate, ws.width/3, ws.height-9)
-		l.SetShowHelp(false)
-		l.Title = board.Title
-		l.InfiniteScrolling = true
-
-		p.populateListFromBoard(board, l)
-
+		l, err := p.listFromBoard(board)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		boards = append(boards, l)
 		node, _ = node.Next()
 		if node != nil {
@@ -507,12 +560,17 @@ func (p *Project) setLists() {
 	p.boards = boards
 }
 
-func (p *Project) populateListFromBoard(b *kanban.Board, l list.Model) {
+func (p *Project) listFromBoard(b *kanban.Board) (list.Model, error) {
 	var items []list.Item
+	l := list.New([]list.Item{}, cardDelegate, ws.width/3, ws.height-9)
+	l.SetShowHelp(false)
+	l.Title = b.Title
+	l.InfiniteScrolling = true
 	for i := 0; i < b.Cards.Length(); i++ {
 		c, err := b.Cards.GetAt(i)
 		if err != nil {
 			log.Println(err)
+			return list.Model{}, err
 		}
 		checkTotal, checkDone := p.getCheckListInfo(c.(*kanban.Card))
 		labelLen, metaSlice := p.getLabelInfo(c.(*kanban.Card))
@@ -528,6 +586,7 @@ func (p *Project) populateListFromBoard(b *kanban.Board, l list.Model) {
 		items = append(items, item)
 		l.SetItems(items)
 	}
+	return l, nil
 }
 
 func (p *Project) getCheckListInfo(c *kanban.Card) (int, int) {
