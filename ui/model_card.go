@@ -2,9 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanban_cli/logger"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -93,8 +93,7 @@ func (c *Card) getCheckItem() *kanban.CheckItem {
 	}
 	ci, err := c.card.CheckList.GetAt(c.checklist.Cursor())
 	if err != nil {
-		log.Println(err)
-		return nil
+		logger.Error.Fatal(err)
 	}
 	return ci.(*kanban.CheckItem)
 }
@@ -105,8 +104,7 @@ func (c *Card) getCardLabel() *kanban.Label {
 	}
 	l, err := c.card.CardLabels.GetAt(c.labels.Cursor())
 	if err != nil {
-		log.Println(err)
-		return nil
+		logger.Error.Fatal(err)
 	}
 	return l.(*kanban.Label)
 }

@@ -1,10 +1,10 @@
 package ui
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanban_cli/logger"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -331,13 +331,13 @@ func (p *Project) moveBoardRight() {
 func (p *Project) moveCard() {
 	bf, err := p.project.Boards.GetAt(p.moveFrom[0])
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 		return
 	}
 	bt := p.getBoard()
 	c, err := bf.(*kanban.Board).Cards.GetAt(p.moveFrom[1])
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 		return
 	}
 	cardVal := *c.(*kanban.Card)
@@ -354,7 +354,7 @@ func (p *Project) deleteBoard() {
 	b := p.getBoard()
 	err := p.project.RemoveBoard(b)
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	if p.project.Boards.Length() == 0 {
 		p.empty = true
@@ -368,7 +368,7 @@ func (p *Project) deleteCard() {
 	c := p.getCard()
 	err := b.RemoveCard(c)
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	p.setLists()
 }

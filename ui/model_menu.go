@@ -2,9 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanban_cli/logger"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -98,7 +98,7 @@ func (m *Menu) getProject() *kanban.Project {
 	}
 	project, err := m.menu.Projects.GetAt(m.list.Cursor())
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	return project.(*kanban.Project)
 }
@@ -168,14 +168,10 @@ func (m *Menu) deleteProject() {
 	if m.empty {
 		return
 	}
-	project, err := m.menu.Projects.GetAt(m.list.Cursor())
+	project := m.getProject()
+	err = m.menu.RemoveProject(project)
 	if err != nil {
-		log.Println(err)
-		return
-	}
-	err = m.menu.RemoveProject(project.(*kanban.Project))
-	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	if m.menu.Projects.Length() == 0 {
 		m.empty = true

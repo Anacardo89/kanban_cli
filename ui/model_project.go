@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanban_cli/logger"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -127,14 +128,10 @@ func (p *Project) getCard() *kanban.Card {
 	if p.emptyBoard[p.cursor] {
 		return nil
 	}
-	board, err := p.project.Boards.GetAt(p.cursor)
+	board := p.getBoard()
+	card, err := board.Cards.GetAt(p.boards[p.cursor].Cursor())
 	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	card, err := board.(*kanban.Board).Cards.GetAt(p.boards[p.cursor].Cursor())
-	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 		return nil
 	}
 	return card.(*kanban.Card)
@@ -173,22 +170,15 @@ func (p *Project) viewCertify() string {
 	var (
 		toDelete interface{}
 		areUsure string
-		err      error
 	)
 	if p.flag == dBoard {
 		toDelete = p.getBoard()
-		if err != nil {
-			log.Println(err)
-		}
 		areUsure = fmt.Sprintf(
 			"Are you sure you wish to delete the board\n\n%s\n\nThis will also delete all cards in the board\nThis operation cannot be reverted\n\ny/N",
 			toDelete.(*kanban.Board).Title,
 		)
 	} else {
 		toDelete = p.getCard()
-		if err != nil {
-			log.Println(err)
-		}
 		areUsure = fmt.Sprintf(
 			"Are you sure you wish to delete the card\n\n%s\n\nThis operation cannot be reverted\n\ny/N",
 			toDelete.(*kanban.Card).Title,
@@ -286,7 +276,7 @@ func (p *Project) setLists() {
 	for i := 0; i < p.project.Boards.Length(); i++ {
 		l, err := p.listFromBoard(board)
 		if err != nil {
-			log.Println(err)
+			logger.Error.Fatal(err)
 			return
 		}
 		boards = append(boards, l)
@@ -307,7 +297,7 @@ func (p *Project) listFromBoard(b *kanban.Board) (list.Model, error) {
 	for i := 0; i < b.Cards.Length(); i++ {
 		c, err := b.Cards.GetAt(i)
 		if err != nil {
-			log.Println(err)
+			logger.Error.Fatal(err)
 			return list.Model{}, err
 		}
 		checkTotal, checkDone := p.getCheckListInfo(c.(*kanban.Card))
@@ -333,7 +323,7 @@ func (p *Project) getCheckListInfo(c *kanban.Card) (int, int) {
 	for i := 0; i < checkTotal; i++ {
 		ci, err := c.CheckList.GetAt(i)
 		if err != nil {
-			log.Println(err)
+			logger.Error.Fatal(err)
 		}
 		if ci.(*kanban.CheckItem).Check {
 			checkDone++
@@ -348,7 +338,7 @@ func (p *Project) getLabelInfo(c *kanban.Card) (int, []Meta) {
 	for i := 0; i < labelLen; i++ {
 		l, err := c.CardLabels.GetAt(i)
 		if err != nil {
-			log.Println(err)
+			logger.Error.Fatal(err)
 		}
 		meta := Meta{
 			initial: string(l.(*kanban.Label).Title[0]),
