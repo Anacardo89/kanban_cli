@@ -1,10 +1,10 @@
 package storage
 
 const (
-	CreateDB = `
+	CreateDBsql = `
 	CREATE TABLE IF NOT EXISTS projects (
 		id INTEGER PRIMARY KEY,
-		title TEXT NOT NULL,
+		title TEXT NOT NULL
 	);
 	
 	CREATE TABLE IF NOT EXISTS boards (
@@ -42,7 +42,7 @@ const (
 	CreateTableProjects = `
 	CREATE TABLE IF NOT EXISTS projects (
 		id INTEGER PRIMARY KEY,
-		title TEXT NOT NULL,
+		title TEXT NOT NULL
 	);`
 	CreateTableBoards = `
 	CREATE TABLE IF NOT EXISTS boards (
@@ -63,6 +63,13 @@ const (
 		title TEXT NOT NULL,
 		card_desc TEXT,
 		board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE
+	);`
+	CreateTableBoardCards = `
+	CREATE TABLE board_cards (
+		board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+		card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+		pos INTEGER NOT NULL
+		UNIQUE(board_id, card_id, pos)
 	);`
 	CreateTableCardLabels = `
 	CREATE TABLE IF NOT EXISTS card_labels (

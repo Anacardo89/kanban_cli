@@ -19,22 +19,26 @@ type Menu struct {
 }
 
 type Project struct {
+	Id     int
 	Title  string
 	Boards dll.DLL
 	Labels dll.DLL
 }
 
 type Board struct {
+	Id    int
 	Title string
 	Cards dll.DLL
 }
 
 type Label struct {
+	Id    int
 	Title string
 	Color string
 }
 
 type Card struct {
+	Id          int
 	Title       string
 	Description string
 	CheckList   dll.DLL
@@ -42,6 +46,7 @@ type Card struct {
 }
 
 type CheckItem struct {
+	Id    int
 	Title string
 	Check bool
 }
