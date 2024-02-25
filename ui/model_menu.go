@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
@@ -16,6 +17,7 @@ type Menu struct {
 	list      list.Model
 	textinput textinput.Model
 	empty     bool
+	flag      actionFlag
 }
 
 func (m Menu) Init() tea.Cmd {
@@ -30,6 +32,19 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.setList()
 		return m, nil
 	case tea.KeyMsg:
+		switch m.flag {
+		case delete:
+			switch msg.String() {
+			case "n", "enter", "esc":
+				m.flag = none
+			case "y":
+				m.deleteProject()
+				m.flag = none
+			}
+			return m, nil
+		case rename:
+		}
+
 		cmd = m.keyPress(msg)
 		return m, cmd
 	}
@@ -43,6 +58,9 @@ func (m Menu) View() string {
 	}
 	if m.empty {
 		return m.viewEmpty()
+	}
+	if m.flag == delete {
+		return m.viewCertify()
 	}
 	return m.viewMenu()
 }
@@ -103,8 +121,13 @@ func (m *Menu) keyPress(msg tea.KeyMsg) tea.Cmd {
 		return func() tea.Msg { return projectState }
 	case "n":
 		return m.textinput.Focus()
+	case "r":
+		m.flag = rename
+		return m.textinput.Focus()
 	case "d":
-		m.deleteProject()
+		if !m.empty {
+			m.flag = delete
+		}
 		return nil
 	}
 	m.list, cmd = m.list.Update(msg)
@@ -126,8 +149,14 @@ func (m *Menu) txtInputEnter() {
 	if m.textinput.Value() == "" {
 		return
 	}
-	m.menu.AddProject(m.textinput.Value())
-	m.empty = false
+	if m.flag == rename {
+		p := m.getProject()
+		p.RenameProject(m.textinput.Value())
+		m.flag = none
+	} else {
+		m.menu.AddProject(m.textinput.Value())
+		m.empty = false
+	}
 	m.setList()
 	m.textinput.SetValue("")
 	m.textinput.Blur()
@@ -181,6 +210,20 @@ func (m *Menu) viewEmpty() string {
 	)
 }
 
+func (m *Menu) viewCertify() string {
+	toDelete := m.getProject()
+	areUsure := fmt.Sprintf(
+		"Are you sure you wish to delete project\n\n%s\n\nThe project will be completely erased\nThis operation cannot be reverted\n\ny/N",
+		toDelete.Title,
+	)
+	areUsureStyled := EmptyStyle.Render(areUsure)
+	return lipgloss.Place(
+		ws.width, ws.height,
+		lipgloss.Center, lipgloss.Center,
+		areUsureStyled,
+	)
+}
+
 func (m *Menu) viewMenu() string {
 	var (
 		bottomLines string
@@ -189,6 +232,10 @@ func (m *Menu) viewMenu() string {
 	menuStyled := ListStyle.Render(m.list.View())
 	if m.textinput.Focused() {
 		inputStyled = InputFieldStyle.Render(m.textinput.View())
+	} else {
+		inputStyled = InputNoFieldStyle.Render(
+			"[kj] [down/up] movement * [ENTER] project * [N]ew [R]ename [D]elete",
+		)
 	}
 	return lipgloss.Place(
 		ws.width, ws.height,

@@ -60,6 +60,9 @@ func (p Project) View() string {
 	if p.empty {
 		return p.viewEmpty()
 	}
+	if p.flag == dBoard || p.flag == dCard {
+		return p.viewCertify()
+	}
 	return p.viewBoards()
 }
 
@@ -166,6 +169,40 @@ func (p *Project) viewEmpty() string {
 	)
 }
 
+func (p *Project) viewCertify() string {
+	var (
+		toDelete interface{}
+		areUsure string
+		err      error
+	)
+	if p.flag == dBoard {
+		toDelete = p.getBoard()
+		if err != nil {
+			log.Println(err)
+		}
+		areUsure = fmt.Sprintf(
+			"Are you sure you wish to delete the board\n\n%s\n\nThis will also delete all cards in the board\nThis operation cannot be reverted\n\ny/N",
+			toDelete.(*kanban.Board).Title,
+		)
+	} else {
+		toDelete = p.getCard()
+		if err != nil {
+			log.Println(err)
+		}
+		areUsure = fmt.Sprintf(
+			"Are you sure you wish to delete the card\n\n%s\n\nThis operation cannot be reverted\n\ny/N",
+			toDelete.(*kanban.Card).Title,
+		)
+	}
+
+	areUsureStyled := EmptyStyle.Render(areUsure)
+	return lipgloss.Place(
+		ws.width, ws.height,
+		lipgloss.Center, lipgloss.Center,
+		areUsureStyled,
+	)
+}
+
 func (p *Project) viewBoards() string {
 	var (
 		boardStyled  string
@@ -199,7 +236,7 @@ func (p *Project) inputStyled() string {
 	} else if p.flag == move && p.moveFrom[0] == -1 {
 		return InputNoFieldStyle.Render("Move: [B]oard or [C]ard")
 	} else if p.flag == move && p.moveFrom[0] != -1 {
-		return InputNoFieldStyle.Render("Press [Enter] to append Card to Board or [Esc] to go back")
+		return InputNoFieldStyle.Render("[Enter] append Card to Board or [Esc] to go back")
 	}
 	switch p.flag {
 	case new:
@@ -208,10 +245,10 @@ func (p *Project) inputStyled() string {
 		return InputNoFieldStyle.Render("Rename: [P]roject or [B]oard")
 	case delete:
 		return InputNoFieldStyle.Render("Delete: [B]oard or [C]ard")
-	case board:
-		return InputNoFieldStyle.Render("Use [Left] and [Right] to move highlighted board. [Enter] to confirm position")
+	case mvBoard:
+		return InputNoFieldStyle.Render("Use [h/l] or [left/right] to move board. [Enter] to confirm position")
 	}
-	return ""
+	return "[hjkl][arrows] movement * [ESC] menu [i] label [ENTER] selected card * [N]ew [M]ove [R]ename [D]elete"
 }
 
 // bubbles
