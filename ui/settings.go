@@ -8,15 +8,22 @@ import (
 type actionFlag string
 
 const (
-	none   actionFlag = "none"
-	new    actionFlag = "new"
-	rename actionFlag = "rename"
-	move   actionFlag = "move"
-	delete actionFlag = "delete"
-	board  actionFlag = "board"
-	card   actionFlag = "card"
-	title  actionFlag = "title"
-	color  actionFlag = "color"
+	none    actionFlag = "none"
+	new     actionFlag = "new"
+	nBoard  actionFlag = "nBoard"
+	nCard   actionFlag = "nCard"
+	rename  actionFlag = "rename"
+	recolor actionFlag = "recolor"
+	move    actionFlag = "move"
+	mvBoard actionFlag = "mvBoard"
+	mvCard  actionFlag = "mvCard"
+	delete  actionFlag = "delete"
+	dBoard  actionFlag = "dBoard"
+	dCard   actionFlag = "dCard"
+	dCheck  actionFlag = "dCheck"
+	dLabel  actionFlag = "dLabel"
+	title   actionFlag = "title"
+	color   actionFlag = "color"
 )
 
 // Window

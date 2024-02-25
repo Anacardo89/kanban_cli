@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
@@ -57,6 +58,9 @@ func (c Card) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (c Card) View() string {
 	if ws.width == 0 {
 		return "loading..."
+	}
+	if c.flag != none {
+		return c.viewCertify()
 	}
 	return c.cardView()
 
@@ -122,12 +126,16 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 		c.textarea, cmd = c.textarea.Update(msg)
 		return cmd
 	}
+	if c.flag != none {
+		cmd = c.checkFlag(msg)
+		return cmd
+	}
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return tea.Quit
-	case "left":
+	case "h", "left":
 		c.handleMoveLeft()
-	case "right":
+	case "l", "right":
 		c.handleMoveRight()
 	case "esc":
 		return func() tea.Msg { return upProject }
@@ -137,12 +145,28 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 	case "n":
 		if c.cursor == checkPos {
 			c.textinput.Placeholder = "CheckItem Title"
-			c.textinput.Focus()
+			return c.textinput.Focus()
+		}
+		return nil
+	case "r":
+		switch c.cursor {
+		case titlePos:
+			c.textinput.Placeholder = "New Card Title"
+			return c.textinput.Focus()
+		case checkPos:
+			c.flag = rename
+			c.textinput.Placeholder = "New CheckItem Title"
+			return c.textinput.Focus()
 		}
 		return nil
 	case "d":
-		if c.cursor == checkPos || c.cursor == labelPos {
-			c.handleDelete()
+		switch c.cursor {
+		case checkPos:
+			c.flag = dCheck
+			return nil
+		case labelPos:
+			c.flag = dLabel
+			return nil
 		}
 	}
 	if c.cursor == checkPos {
@@ -173,10 +197,15 @@ func (c *Card) txtInputEnter() {
 		return
 	}
 	switch c.cursor {
-	case 0:
+	case titlePos:
 		c.card.RenameCard(c.textinput.Value())
-	case 2:
-		c.card.AddCheckItem(c.textinput.Value())
+	case checkPos:
+		if c.flag == rename {
+			ci := c.getCheckItem()
+			ci.RenameCheckItem(c.textinput.Value())
+		} else {
+			c.card.AddCheckItem(c.textinput.Value())
+		}
 	}
 	c.setLists()
 	c.textinput.SetValue("")
@@ -187,7 +216,7 @@ func (c *Card) txtInputEnter() {
 func (c *Card) enterKeyPress() tea.Cmd {
 	switch c.cursor {
 	case titlePos:
-		c.textinput.Placeholder = "Card Title"
+		c.textinput.Placeholder = "New Card Title"
 		c.textinput.Focus()
 	case descPos:
 		c.textarea.Focus()
@@ -200,6 +229,34 @@ func (c *Card) enterKeyPress() tea.Cmd {
 		c.setLists()
 	case labelPos:
 		return func() tea.Msg { return labelState }
+	}
+	return nil
+}
+
+func (c *Card) checkFlag(msg tea.KeyMsg) tea.Cmd {
+	switch c.flag {
+	case dCheck:
+		switch msg.String() {
+		case "n", "enter", "esc":
+			c.flag = none
+		case "y":
+			ci := c.getCheckItem()
+			c.card.RemoveCheckItem(ci)
+			c.setLists()
+			c.flag = none
+		}
+		return nil
+	case dLabel:
+		switch msg.String() {
+		case "n", "enter", "esc":
+			c.flag = none
+		case "y":
+			cl := c.getCardLabel()
+			c.card.RemoveLabel(cl)
+			c.setLists()
+			c.flag = none
+		}
+		return nil
 	}
 	return nil
 }
@@ -222,24 +279,30 @@ func (c *Card) handleMoveLeft() {
 	}
 }
 
-// delete
-func (c *Card) handleDelete() {
-	switch c.cursor {
-	case checkPos:
-		ci := c.getCheckItem()
-		c.card.RemoveCheckItem(ci)
-	case labelPos:
-		l := c.getCardLabel()
-		c.card.RemoveLabel(l)
-	}
-	c.setLists()
-}
-
 // View
 func (c *Card) cardView() string {
 	var inputStyled = ""
 	if c.textinput.Focused() {
 		inputStyled = InputFieldStyle.Render(c.textinput.View())
+	} else {
+		switch c.cursor {
+		case titlePos:
+			inputStyled = InputNoFieldStyle.Render(
+				"[hl] [left/right] movement * [ESC] project * [ENTER][R]ename ",
+			)
+		case descPos:
+			inputStyled = InputNoFieldStyle.Render(
+				"[hl] [left/right] movement * [ESC] project * [ENTER]/[ESC] focus/unfocus",
+			)
+		case checkPos:
+			inputStyled = InputNoFieldStyle.Render(
+				"[hl] [left/right] movement * [ESC] project * [N]ew [D]elete [R]ename * [ENTER] check/uncheck",
+			)
+		case labelPos:
+			inputStyled = InputNoFieldStyle.Render(
+				"[hl] [left/right] movement * [ESC] project * [D]elete * [ENTER] select label",
+			)
+		}
 	}
 	cardStyled := c.renderCard()
 	return lipgloss.Place(
@@ -252,6 +315,33 @@ func (c *Card) cardView() string {
 			cardStyled,
 			inputStyled,
 		),
+	)
+}
+
+func (c *Card) viewCertify() string {
+	var (
+		toDelete interface{}
+		areUsure string
+	)
+	if c.flag == dCheck {
+		toDelete = c.getCheckItem()
+		areUsure = fmt.Sprintf(
+			"Are you sure you wish to delete item\n\n%s\n\nfrom the checklist?\n\ny/N",
+			toDelete.(*kanban.CheckItem).Title,
+		)
+	} else {
+		toDelete = c.getCardLabel()
+		areUsure = fmt.Sprintf(
+			"Are you sure you wish to delete label\n\n%s\n\nfrom the card?\n\ny/N",
+			toDelete.(*kanban.Label).Title,
+		)
+	}
+
+	areUsureStyled := EmptyStyle.Render(areUsure)
+	return lipgloss.Place(
+		ws.width, ws.height,
+		lipgloss.Center, lipgloss.Center,
+		areUsureStyled,
 	)
 }
 
