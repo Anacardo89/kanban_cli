@@ -16,21 +16,18 @@ var (
 func DBExists() bool {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		logger.Error.Println("Cannot extract HOME:", err)
+		logger.Error.Fatal("Cannot extract HOME:", err)
 	}
 	dbPath = home + "/.kanboards/db.db"
 	_, err = os.Open(dbPath)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func SetDB() {
 	var err error
 	DB, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
-		logger.Error.Println(err)
+		logger.Error.Fatal("Cannot establish DB connection:", err)
 		err = nil
 	}
 }

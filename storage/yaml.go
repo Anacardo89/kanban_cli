@@ -1,8 +1,7 @@
 package storage
 
 import (
-	"log"
-
+	"github.com/Anacardo89/kanban_cli/logger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -41,12 +40,12 @@ type CheckItem struct {
 func (m *Menu) ToYAML() string {
 	data, err := yaml.Marshal(m)
 	if err != nil {
-		log.Println(err)
+		logger.Error.Println("Cannot export to YAML", err)
 	}
 	datastr := string(data)
 	return datastr
 }
 
 func ToFile(string) {
-
+	// TODO
 }

@@ -26,6 +26,6 @@ func main() {
 	p := tea.NewProgram(ui.New(), tea.WithAltScreen())
 	_, err = p.Run()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error.Fatal(err)
 	}
 }

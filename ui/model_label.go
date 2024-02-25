@@ -3,9 +3,9 @@ package ui
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 
 	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanban_cli/logger"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -82,7 +82,7 @@ func (l *Label) getLabel() *kanban.Label {
 	}
 	label, err := l.project.Labels.GetAt(l.list.Cursor())
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	return label.(*kanban.Label)
 }
@@ -226,7 +226,7 @@ func (l *Label) renameCardLabels() {
 		for i := 0; i < card.CardLabels.Length(); i++ {
 			cl, err := card.CardLabels.GetAt(i)
 			if err != nil {
-				log.Println(err)
+				logger.Error.Fatal(err)
 			}
 			if cl.(*kanban.Label).Title == tmpTitle {
 				cl.(*kanban.Label).Title = l.textinput.Value()
@@ -241,7 +241,7 @@ func (l *Label) recolorCardLabels() {
 		for i := 0; i < card.CardLabels.Length(); i++ {
 			cl, err := card.CardLabels.GetAt(i)
 			if err != nil {
-				log.Println(err)
+				logger.Error.Fatal(err)
 			}
 			if cl.(*kanban.Label).Color == tmpTitle {
 				cl.(*kanban.Label).Color = l.textinput.Value()
@@ -257,7 +257,7 @@ func (l *Label) deleteLabel(label *kanban.Label) {
 	}
 	err = l.project.RemoveLabel(label)
 	if err != nil {
-		log.Println(err)
+		logger.Error.Fatal(err)
 	}
 	if l.project.Labels.Length() == 0 {
 		l.empty = true
@@ -280,14 +280,12 @@ func (l *Label) getAllCards() []*kanban.Card {
 	for i := 0; i < l.project.Boards.Length(); i++ {
 		b, err := l.project.Boards.GetAt(i)
 		if err != nil {
-			log.Println(err)
-			return nil
+			logger.Error.Fatal(err)
 		}
 		for j := 0; j < b.(*kanban.Board).Cards.Length(); j++ {
 			c, err := b.(*kanban.Board).Cards.GetAt(j)
 			if err != nil {
-				log.Println(err)
-				return nil
+				logger.Error.Fatal(err)
 			}
 			cards = append(cards, c.(*kanban.Card))
 		}
