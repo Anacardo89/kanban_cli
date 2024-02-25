@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -12,8 +13,9 @@ import (
 )
 
 var (
-	tmpTitle = ""
-	tmpColor = ""
+	tmpTitle   = ""
+	tmpColor   = ""
+	recolorClr = ""
 )
 
 // Implements tea.Model
@@ -130,7 +132,7 @@ func (l *Label) keyPress(msg tea.KeyMsg) tea.Cmd {
 		l.flag = delete
 		return nil
 	case "c":
-		l.textinput.Placeholder = "New Label Hex Color"
+		l.textinput.Placeholder = "New Label Hex Color (without #)"
 		l.flag = recolor
 		label := l.getLabel()
 		tmpTitle = label.Title
@@ -166,17 +168,16 @@ func (l *Label) txtInputEnter() {
 		}
 		tmpTitle = l.textinput.Value()
 		l.textinput.SetValue("")
-		l.textinput.Placeholder = "Label Hex Color"
+		l.textinput.Placeholder = "Label Hex Color (without #)"
 		l.flag = color
 		return
 	case color:
 		tmpColor = l.textinput.Value()
-		if tmpColor[0] != '#' {
-			tmpColor = string('#') + tmpColor
-		}
-		if len(tmpColor) != 7 {
+		_, err := hex.DecodeString(tmpColor)
+		if err != nil {
 			return
 		}
+		tmpColor = string('#') + tmpColor
 		l.project.AddLabel(tmpTitle, tmpColor)
 		l.empty = false
 		l.setList()
@@ -201,14 +202,14 @@ func (l *Label) txtInputEnter() {
 			l.flag = none
 			return
 		}
-		if l.textinput.Value()[0] != '#' {
-			l.textinput.SetValue("#" + l.textinput.Value())
-		}
-		if len(tmpColor) != 7 {
+		recolorClr = l.textinput.Value()
+		_, err := hex.DecodeString(recolorClr)
+		if err != nil {
 			return
 		}
+		recolorClr = string('#') + recolorClr
 		label := l.getLabel()
-		label.Color = l.textinput.Value()
+		label.Color = recolorClr
 		l.setList()
 		l.recolorCardLabels()
 		l.textinput.SetValue("")

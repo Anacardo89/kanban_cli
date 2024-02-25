@@ -9,7 +9,6 @@ import (
 )
 
 // called by project.Update()
-// textinput
 func (p *Project) inputFocused(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg.String() {
@@ -25,37 +24,6 @@ func (p *Project) inputFocused(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
-func (p *Project) txtInputEnter() {
-	if p.textinput.Value() == "" {
-		return
-	}
-	switch p.flag {
-	case nBoard:
-		p.project.AddBoard(p.textinput.Value())
-		if p.empty {
-			p.empty = false
-		}
-		p.emptyBoard = append(p.emptyBoard, true)
-		p.cursor = 0
-	case nCard:
-		b := p.getBoard()
-		b.AddCard(p.textinput.Value())
-		p.emptyBoard[p.cursor] = false
-	case rename:
-		if strings.Contains(p.textinput.Placeholder, "Project") {
-			p.project.RenameProject(p.textinput.Value())
-		} else {
-			b := p.getBoard()
-			b.RenameBoard(p.textinput.Value())
-		}
-	}
-	p.flag = none
-	p.setLists()
-	p.textinput.SetValue("")
-	p.textinput.Blur()
-}
-
-// actionFlag
 func (p *Project) checkFlag(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch p.flag {
@@ -88,6 +56,87 @@ func (p *Project) checkFlag(msg tea.KeyMsg) tea.Cmd {
 	return cmd
 }
 
+func (p *Project) keyPress(msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	switch msg.String() {
+	case "ctrl+c", "q":
+		return tea.Quit
+	case "k", "j", "up", "down":
+		if p.empty {
+			return nil
+		}
+	case "h", "left":
+		if !p.empty {
+			p.moveLeft()
+		}
+		return nil
+	case "l", "right":
+		if !p.empty {
+			p.moveRight()
+		}
+		return nil
+	case "i":
+		return func() tea.Msg { return labelState }
+	case "enter":
+		cmd = p.keyPressEnter()
+		return cmd
+	case "esc":
+		return func() tea.Msg { return upMenu }
+	case "n":
+		cmd = p.keyPressN()
+		return cmd
+	case "m":
+		if !p.empty {
+			p.flag = move
+		}
+		return nil
+	case "r":
+		if !p.empty {
+			p.flag = rename
+		}
+		return nil
+	case "d":
+		if !p.empty {
+			p.flag = delete
+		}
+		return nil
+	}
+	p.boards[p.cursor], cmd = p.boards[p.cursor].Update(msg)
+	return cmd
+}
+
+// textinput
+func (p *Project) txtInputEnter() {
+	if p.textinput.Value() == "" {
+		return
+	}
+	switch p.flag {
+	case nBoard:
+		p.project.AddBoard(p.textinput.Value())
+		if p.empty {
+			p.empty = false
+		}
+		p.emptyBoard = append(p.emptyBoard, true)
+		p.cursor = 0
+	case nCard:
+		b := p.getBoard()
+		b.AddCard(p.textinput.Value())
+		p.emptyBoard[p.cursor] = false
+	case rename:
+		if strings.Contains(p.textinput.Placeholder, "Project") {
+			p.project.RenameProject(p.textinput.Value())
+		} else {
+			b := p.getBoard()
+			b.RenameBoard(p.textinput.Value())
+		}
+	}
+	p.flag = none
+	p.setLists()
+	p.textinput.SetValue("")
+	p.textinput.Blur()
+}
+
+// actionFlag
 func (p *Project) flagNew(msg tea.KeyMsg) tea.Cmd {
 	if p.empty {
 		p.textinput.Placeholder = BOARD_TITLE
@@ -125,9 +174,9 @@ func (p *Project) flagMove(msg tea.KeyMsg) tea.Cmd {
 func (p *Project) flagMvBoard(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch msg.String() {
-	case "left":
+	case "h", "left":
 		p.moveBoardLeft()
-	case "right":
+	case "l", "right":
 		p.moveBoardRight()
 	case "enter", "esc":
 		p.flag = none
@@ -205,54 +254,14 @@ func (p *Project) flagDCard(msg tea.KeyMsg) tea.Cmd {
 }
 
 // key presses
-func (p *Project) keyPress(msg tea.KeyMsg) tea.Cmd {
-	var cmd tea.Cmd
-	switch msg.String() {
-	case "ctrl+c", "q":
-		return tea.Quit
-	case "h", "left":
-		p.moveLeft()
-	case "l", "right":
-		p.moveRight()
-	case "i":
-		return func() tea.Msg { return labelState }
-	case "enter":
-		if p.empty {
-			return nil
-		}
-		if p.emptyBoard[p.cursor] {
-			return nil
-		}
-		return func() tea.Msg { return cardState }
-	case "esc":
-		return func() tea.Msg { return upMenu }
-	case "n":
-		if p.empty {
-			p.flag = nBoard
-			return p.textinput.Focus()
-		} else {
-			p.flag = new
-			return nil
-		}
-	case "m":
-		if !p.empty {
-			p.flag = move
-		}
+func (p *Project) keyPressEnter() tea.Cmd {
+	if p.empty {
 		return nil
-	case "r":
-		if !p.empty {
-			p.flag = rename
-		}
-		return nil
-	case "d":
-		if !p.empty {
-			p.flag = delete
-		}
-		return nil
-
 	}
-	p.boards[p.cursor], cmd = p.boards[p.cursor].Update(msg)
-	return cmd
+	if p.emptyBoard[p.cursor] {
+		return nil
+	}
+	return func() tea.Msg { return cardState }
 }
 
 // actions
@@ -276,6 +285,17 @@ func (p *Project) moveRight() {
 		p.cursor = 0
 	} else {
 		p.cursor++
+	}
+}
+
+// new
+func (p *Project) keyPressN() tea.Cmd {
+	if p.empty {
+		p.flag = nBoard
+		return p.textinput.Focus()
+	} else {
+		p.flag = new
+		return nil
 	}
 }
 
