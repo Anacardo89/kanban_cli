@@ -58,8 +58,9 @@ func StartMenu() *Menu {
 	}
 }
 
-func (m *Menu) AddProject(title string) {
+func (m *Menu) AddProject(id int, title string) {
 	project := &Project{
+		Id:     id,
 		Title:  title,
 		Boards: dll.New(),
 		Labels: dll.New(),
@@ -77,8 +78,9 @@ func (p *Project) RenameProject(title string) {
 	p.Title = title
 }
 
-func (p *Project) AddBoard(title string) {
+func (p *Project) AddBoard(id int, title string) {
 	board := &Board{
+		Id:    id,
 		Title: title,
 		Cards: dll.New(),
 	}
@@ -90,8 +92,9 @@ func (p *Project) RemoveBoard(board *Board) error {
 	return err
 }
 
-func (p *Project) AddLabel(title string, color string) {
+func (p *Project) AddLabel(id int, title string, color string) {
 	label := &Label{
+		Id:    id,
 		Title: title,
 		Color: color,
 	}
@@ -117,8 +120,9 @@ func (b *Board) RenameBoard(title string) {
 	b.Title = title
 }
 
-func (b *Board) AddCard(title string) {
+func (b *Board) AddCard(id int, title string) {
 	card := &Card{
+		Id:         id,
 		Title:      title,
 		CheckList:  dll.New(),
 		CardLabels: dll.New(),
@@ -140,8 +144,9 @@ func (c *Card) AddDescription(description string) {
 	c.Description = description
 }
 
-func (c *Card) AddCheckItem(title string) {
+func (c *Card) AddCheckItem(id int, title string) {
 	checkItem := &CheckItem{
+		Id:    id,
 		Title: title,
 		Check: false,
 	}

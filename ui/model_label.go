@@ -6,6 +6,7 @@ import (
 
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanban_cli/storage"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -178,7 +179,13 @@ func (l *Label) txtInputEnter() {
 			return
 		}
 		tmpColor = string('#') + tmpColor
-		l.project.AddLabel(tmpTitle, tmpColor)
+		res := storage.CreateLabel(tmpTitle, tmpColor, l.project.Id)
+		id64, err := (res.LastInsertId())
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+		id := int(id64)
+		l.project.AddLabel(id, tmpTitle, tmpColor)
 		l.empty = false
 		l.setList()
 		l.textinput.SetValue("")
@@ -190,7 +197,8 @@ func (l *Label) txtInputEnter() {
 			return
 		}
 		label := l.getLabel()
-		label.Title = l.textinput.Value()
+		storage.UpdateLabelTitle(label.Id, l.textinput.Value())
+		label.RenameLabel(l.textinput.Value())
 		l.setList()
 		l.renameCardLabels()
 		l.textinput.SetValue("")
@@ -209,6 +217,7 @@ func (l *Label) txtInputEnter() {
 		}
 		recolorClr = string('#') + recolorClr
 		label := l.getLabel()
+		storage.UpdateLabelColor(label.Id, l.textinput.Value())
 		label.Color = recolorClr
 		l.setList()
 		l.recolorCardLabels()
@@ -229,7 +238,7 @@ func (l *Label) renameCardLabels() {
 				logger.Error.Fatal(err)
 			}
 			if cl.(*kanban.Label).Title == tmpTitle {
-				cl.(*kanban.Label).Title = l.textinput.Value()
+				cl.(*kanban.Label).RenameLabel(l.textinput.Value())
 			}
 		}
 	}
@@ -244,7 +253,7 @@ func (l *Label) recolorCardLabels() {
 				logger.Error.Fatal(err)
 			}
 			if cl.(*kanban.Label).Color == tmpTitle {
-				cl.(*kanban.Label).Color = l.textinput.Value()
+				cl.(*kanban.Label).ChangeColor(l.textinput.Value())
 			}
 		}
 	}
@@ -255,6 +264,7 @@ func (l *Label) deleteLabel(label *kanban.Label) {
 	if l.empty {
 		return
 	}
+	storage.DeleteLabel(label.Id)
 	err = l.project.RemoveLabel(label)
 	if err != nil {
 		logger.Error.Fatal(err)
@@ -271,6 +281,7 @@ func (l *Label) deleteLabelFromCards(label *kanban.Label) {
 	}
 	cards := l.getAllCards()
 	for _, card := range cards {
+		storage.DeleteCardLabel(label.Id)
 		card.RemoveLabel(label)
 	}
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanban_cli/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -112,7 +113,13 @@ func (p *Project) txtInputEnter() {
 	}
 	switch p.flag {
 	case nBoard:
-		p.project.AddBoard(p.textinput.Value())
+		res := storage.CreateBoard(p.textinput.Value(), p.project.Id)
+		id64, err := res.LastInsertId()
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+		id := int(id64)
+		p.project.AddBoard(id, p.textinput.Value())
 		if p.empty {
 			p.empty = false
 		}
@@ -120,13 +127,21 @@ func (p *Project) txtInputEnter() {
 		p.cursor = 0
 	case nCard:
 		b := p.getBoard()
-		b.AddCard(p.textinput.Value())
+		res := storage.CreateCard(p.textinput.Value(), b.Id)
+		id64, err := res.LastInsertId()
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+		id := int(id64)
+		b.AddCard(id, p.textinput.Value())
 		p.emptyBoard[p.cursor] = false
 	case rename:
 		if strings.Contains(p.textinput.Placeholder, "Project") {
+			storage.UpdateProject(p.project.Id, p.textinput.Value())
 			p.project.RenameProject(p.textinput.Value())
 		} else {
 			b := p.getBoard()
+			storage.UpdateBoard(b.Id, p.textinput.Value())
 			b.RenameBoard(p.textinput.Value())
 		}
 	}
@@ -340,6 +355,7 @@ func (p *Project) moveCard() {
 		logger.Error.Fatal(err)
 		return
 	}
+	storage.UpdateCardParent(c.(*kanban.Card).Id, bt.Id)
 	cardVal := *c.(*kanban.Card)
 	bf.(*kanban.Board).Cards.RemoveAt(p.moveFrom[1])
 	bt.Cards.Append(&cardVal)
@@ -352,6 +368,7 @@ func (p *Project) deleteBoard() {
 		return
 	}
 	b := p.getBoard()
+	storage.DeleteBoard(b.Id)
 	err := p.project.RemoveBoard(b)
 	if err != nil {
 		logger.Error.Fatal(err)
@@ -366,6 +383,7 @@ func (p *Project) deleteBoard() {
 func (p *Project) deleteCard() {
 	b := p.getBoard()
 	c := p.getCard()
+	storage.DeleteCard(c.Id)
 	err := b.RemoveCard(c)
 	if err != nil {
 		logger.Error.Fatal(err)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanban_cli/storage"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -119,6 +120,7 @@ func (c *Card) keyPress(msg tea.KeyMsg) tea.Cmd {
 	if c.textarea.Focused() {
 		switch msg.String() {
 		case "esc":
+			storage.UpdateCardDesc(c.card.Id, c.textarea.Value())
 			c.textarea.Blur()
 		}
 		c.textarea, cmd = c.textarea.Update(msg)
@@ -196,13 +198,21 @@ func (c *Card) txtInputEnter() {
 	}
 	switch c.cursor {
 	case titlePos:
+		storage.UpdateCardTitle(c.card.Id, c.textinput.Value())
 		c.card.RenameCard(c.textinput.Value())
 	case checkPos:
 		if c.flag == rename {
 			ci := c.getCheckItem()
+			storage.UpdateCheckItemTitle(ci.Id, c.textinput.Value())
 			ci.RenameCheckItem(c.textinput.Value())
 		} else {
-			c.card.AddCheckItem(c.textinput.Value())
+			res := storage.CreateCheckItem(c.textinput.Value(), 0, c.card.Id)
+			id64, err := (res.LastInsertId())
+			if err != nil {
+				logger.Error.Fatal(err)
+			}
+			id := int(id64)
+			c.card.AddCheckItem(id, c.textinput.Value())
 		}
 	}
 	c.setLists()
@@ -222,8 +232,13 @@ func (c *Card) enterKeyPress() tea.Cmd {
 		if c.card.CheckList.Length() == 0 {
 			return nil
 		}
-		checkitem := c.getCheckItem()
-		checkitem.CheckCheckItem()
+		ci := c.getCheckItem()
+		done := 0
+		if ci.Check {
+			done = 1
+		}
+		storage.UpdateCheckItemDone(ci.Id, done)
+		ci.CheckCheckItem()
 		c.setLists()
 	case labelPos:
 		return func() tea.Msg { return labelState }
@@ -239,6 +254,7 @@ func (c *Card) checkFlag(msg tea.KeyMsg) tea.Cmd {
 			c.flag = none
 		case "y":
 			ci := c.getCheckItem()
+			storage.DeleteCheckItem(ci.Id)
 			c.card.RemoveCheckItem(ci)
 			c.setLists()
 			c.flag = none
@@ -250,6 +266,7 @@ func (c *Card) checkFlag(msg tea.KeyMsg) tea.Cmd {
 			c.flag = none
 		case "y":
 			cl := c.getCardLabel()
+			storage.DeleteCardLabel(cl.Id)
 			c.card.RemoveLabel(cl)
 			c.setLists()
 			c.flag = none
