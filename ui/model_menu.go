@@ -5,6 +5,7 @@ import (
 
 	"github.com/Anacardo89/kanban_cli/kanban"
 	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanban_cli/storage"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,7 +43,6 @@ func (m Menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.flag = none
 			}
 			return m, nil
-		case rename:
 		}
 
 		cmd = m.keyPress(msg)
@@ -64,16 +64,6 @@ func (m Menu) View() string {
 	}
 	return m.viewMenu()
 }
-
-// **************************************
-func TestData() Menu {
-	return Menu{
-		menu:      kanban.TestData(),
-		textinput: textinput.New(),
-	}
-}
-
-// **************************************
 
 // called by model_selector
 func NewMenu() Menu {
@@ -151,10 +141,17 @@ func (m *Menu) txtInputEnter() {
 	}
 	if m.flag == rename {
 		p := m.getProject()
+		storage.UpdateProject(p.Id, m.textinput.Value())
 		p.RenameProject(m.textinput.Value())
 		m.flag = none
 	} else {
-		m.menu.AddProject(m.textinput.Value())
+		res := storage.CreateProject(m.textinput.Value())
+		id64, err := (res.LastInsertId())
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+		id := int(id64)
+		m.menu.AddProject(id, m.textinput.Value())
 		m.empty = false
 	}
 	m.setList()
@@ -168,8 +165,9 @@ func (m *Menu) deleteProject() {
 	if m.empty {
 		return
 	}
-	project := m.getProject()
-	err = m.menu.RemoveProject(project)
+	p := m.getProject()
+	storage.DeleteProject(p.Id)
+	err = m.menu.RemoveProject(p)
 	if err != nil {
 		logger.Error.Fatal(err)
 	}

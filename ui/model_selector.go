@@ -73,16 +73,6 @@ func (s Selector) View() string {
 	return ""
 }
 
-// **************************************
-func Test() Selector {
-	return Selector{
-		state: menuState,
-		menu:  TestData(),
-	}
-}
-
-// **************************************
-
 // called by main
 func New() Selector {
 	return Selector{

@@ -8,6 +8,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const (
+	ErrCreatSQLstmt string = "Error creating SQL statement:"
+	ErrExecSQLstmt  string = "Error executing SQL statement:"
+)
+
 var (
 	DB     *sql.DB
 	dbPath string
@@ -42,11 +47,60 @@ func CreateDB() {
 	if err != nil {
 		logger.Error.Fatal("Cannot establish DB connection:", err)
 	}
-	createDB, err := DB.Prepare(CreateDBsql)
+
+	createProjects, err := DB.Prepare(CreateTableProjects)
 	if err != nil {
-		logger.Error.Fatal("Error creating SQL statement:", err)
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
 	}
-	createDB.Exec()
+	_, err = createProjects.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+
+	createBoards, err := DB.Prepare(CreateTableBoards)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	_, err = createBoards.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+
+	createLabels, err := DB.Prepare(CreateTableLabels)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	_, err = createLabels.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+
+	createCards, err := DB.Prepare(CreateTableCards)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	_, err = createCards.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+
+	createCardLabels, err := DB.Prepare(CreateTableCardLabels)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	_, err = createCardLabels.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+
+	createCheckItems, err := DB.Prepare(CreateTableCheckItems)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	_, err = createCheckItems.Exec()
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
 }
 
 func CreateDBfile() {

@@ -1,42 +1,181 @@
 package storage
 
 const (
-	CreateDBsql = `
+	CreateTableProjects = `
 	CREATE TABLE IF NOT EXISTS projects (
 		id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL
-	);
-	
+	);`
+	CreateTableBoards = `
 	CREATE TABLE IF NOT EXISTS boards (
 		id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL,
 		project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
-	);
-	
+	);`
+	CreateTableLabels = `
 	CREATE TABLE IF NOT EXISTS labels (
 		id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL,
 		color TEXT NOT NULL,
 		project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
-	);
-
+	);`
+	CreateTableCards = `
 	CREATE TABLE IF NOT EXISTS cards (
 		id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL,
 		card_desc TEXT,
 		board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE
-	);
-
+	);`
+	CreateTableCardLabels = `
 	CREATE TABLE IF NOT EXISTS card_labels (
 		card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
 		label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
 		UNIQUE(card_id, label_id)
-	);
-	
+	);`
+	CreateTableCheckItems = `
 	CREATE TABLE IF NOT EXISTS check_items (
 		id INTEGER PRIMARY KEY,
 		title TEXT NOT NULL,
-		check INTEGER NOT NULL,
+		done INTEGER NOT NULL,
 		card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE
 	);`
+
+	// queries
+	// projects
+	CreateProjectSql = `
+	INSERT INTO projects (title)
+		VALUES ($1)
+		RETURNING *;`
+	UpdateProjectSql = `
+	UPDATE projects
+		SET title = $2
+		WHERE id = $1
+		RETURNING *;`
+	DeleteProjectSql = `
+		DELETE FROM projects
+		WHERE id = $1;`
+
+	// boards
+	CreateBoardSql = `
+	INSERT INTO boards (title, project_id)
+		VALUES ($1, $2)
+		RETURNING *;`
+	UpdateBoardSql = `
+	UPDATE boards
+		SET title = $2
+		WHERE id = $1
+		RETURNING *;`
+	DeleteBoardSql = `
+	DELETE FROM boards
+		WHERE id = $1;`
+
+	// labels
+	CreateLabelSql = `
+	INSERT INTO labels (title, color, project_id)
+		VALUES ($1, $2, $3)
+		RETURNING *;`
+	UpdateLabelTitleSql = `
+	UPDATE labels
+		SET title = $2
+		WHERE id = $1
+		RETURNING *;`
+	UpdateLabelColorSql = `
+	UPDATE labels
+		SET color = $2
+		WHERE id = $1
+		RETURNING *;`
+	DeleteLabelSql = `
+	DELETE FROM labels
+		WHERE id = $1;`
+
+	// cards
+	CreateCardSql = `
+	INSERT INTO cards (title, board_id)
+		VALUES ($1, $2)
+		RETURNING *;`
+	UpdateCardTitleSql = `
+	UPDATE cards
+		SET title = $2
+		WHERE id = $1
+		RETURNING *;`
+	UpdateCardDescSql = `
+	UPDATE cards
+		SET card_desc = $2
+		WHERE id = $1
+		RETURNING *;`
+	UpdateCardParentSql = `
+	UPDATE cards
+		SET board_id = $2
+		WHERE id = $1
+		RETURNING *;`
+	DeleteCardSql = `
+	DELETE FROM cards
+		WHERE id = $1;`
+
+	// card_labels
+	CreateCardLabelSql = `
+	INSERT INTO card_labels (card_id, label_id)
+		VALUES ($1, $2)
+		RETURNING *;`
+	DeleteCardLabelSql = `
+	DELETE FROM card_labels
+		WHERE label_id = $1;`
+
+	// check_items
+	CreateCheckItemSql = `
+	INSERT INTO check_items (title, done, card_id)
+		VALUES ($1, $2, $3)
+		RETURNING *;`
+	UpdateCheckItemTitleSql = `
+	UPDATE check_items
+		SET title = $2
+		WHERE id = $1
+		RETURNING *;`
+	UpdateCheckItemDoneSql = `
+	UPDATE check_items
+		SET done = $2
+		WHERE id = $1
+		RETURNING *;`
+	DeleteCheckItemSql = `
+	DELETE FROM check_items
+		WHERE id = $1;`
+
+	// CreateDBsql = `
+	// CREATE TABLE IF NOT EXISTS projects (
+	// 	id INTEGER PRIMARY KEY,
+	// 	title TEXT NOT NULL
+	// );
+
+	// CREATE TABLE IF NOT EXISTS boards (
+	// 	id INTEGER PRIMARY KEY,
+	// 	title TEXT NOT NULL,
+	// 	project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
+	// );
+
+	// CREATE TABLE IF NOT EXISTS labels (
+	// 	id INTEGER PRIMARY KEY,
+	// 	title TEXT NOT NULL,
+	// 	color TEXT NOT NULL,
+	// 	project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
+	// );
+
+	// CREATE TABLE IF NOT EXISTS cards (
+	// 	id INTEGER PRIMARY KEY,
+	// 	title TEXT NOT NULL,
+	// 	card_desc TEXT,
+	// 	board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE
+	// );
+
+	// CREATE TABLE IF NOT EXISTS card_labels (
+	// 	card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+	// 	label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
+	// 	UNIQUE(card_id, label_id)
+	// );
+
+	// CREATE TABLE IF NOT EXISTS check_items (
+	// 	id INTEGER PRIMARY KEY,
+	// 	title TEXT NOT NULL,
+	// 	check INTEGER NOT NULL,
+	// 	card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE
+	// );`
 )
