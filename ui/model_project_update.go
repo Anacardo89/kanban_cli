@@ -133,7 +133,7 @@ func (p *Project) txtInputEnter() {
 			logger.Error.Fatal(err)
 		}
 		id := int(id64)
-		b.AddCard(id, p.textinput.Value())
+		b.AddCard(id, p.textinput.Value(), "")
 		p.emptyBoard[p.cursor] = false
 	case rename:
 		if strings.Contains(p.textinput.Placeholder, "Project") {
@@ -241,6 +241,8 @@ func (p *Project) flagDelete(msg tea.KeyMsg) tea.Cmd {
 	case "c":
 		if !p.emptyBoard[p.cursor] {
 			p.flag = dCard
+		} else {
+			p.flag = none
 		}
 	}
 	return nil
@@ -344,21 +346,21 @@ func (p *Project) moveBoardRight() {
 }
 
 func (p *Project) moveCard() {
-	bf, err := p.project.Boards.GetAt(p.moveFrom[0])
+	boardFrom, err := p.project.Boards.GetAt(p.moveFrom[0])
 	if err != nil {
 		logger.Error.Fatal(err)
 		return
 	}
-	bt := p.getBoard()
-	c, err := bf.(*kanban.Board).Cards.GetAt(p.moveFrom[1])
+	boardTo := p.getBoard()
+	c, err := boardFrom.(*kanban.Board).Cards.GetAt(p.moveFrom[1])
 	if err != nil {
 		logger.Error.Fatal(err)
 		return
 	}
-	storage.UpdateCardParent(c.(*kanban.Card).Id, bt.Id)
 	cardVal := *c.(*kanban.Card)
-	bf.(*kanban.Board).Cards.RemoveAt(p.moveFrom[1])
-	bt.Cards.Append(&cardVal)
+	storage.UpdateCardParent(cardVal.Id, boardTo.Id)
+	boardFrom.(*kanban.Board).Cards.RemoveAt(p.moveFrom[1])
+	boardTo.Cards.Append(&cardVal)
 	p.setLists()
 }
 
@@ -388,5 +390,6 @@ func (p *Project) deleteCard() {
 	if err != nil {
 		logger.Error.Fatal(err)
 	}
+	p.emptyBoard[p.cursor] = true
 	p.setLists()
 }

@@ -212,7 +212,7 @@ func (c *Card) txtInputEnter() {
 				logger.Error.Fatal(err)
 			}
 			id := int(id64)
-			c.card.AddCheckItem(id, c.textinput.Value())
+			c.card.AddCheckItem(id, c.textinput.Value(), false)
 		}
 	}
 	c.setLists()

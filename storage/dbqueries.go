@@ -7,6 +7,31 @@ import (
 )
 
 // projects
+type ProjectSql struct {
+	Id    int
+	Title string
+}
+
+func GetAllProjects() []ProjectSql {
+	var items []ProjectSql
+	rows, err := DB.Query(SelectAllProjectsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	for rows.Next() {
+		var i ProjectSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	rows.Close()
+	return items
+}
+
 func CreateProject(title string) sql.Result {
 	stmt, err := DB.Prepare(CreateProjectSql)
 	if err != nil {
@@ -43,6 +68,33 @@ func DeleteProject(id int) {
 }
 
 // boards
+type BoardSql struct {
+	Id        int
+	Title     string
+	ProjectId int
+}
+
+func GetAllBoards() []BoardSql {
+	var items []BoardSql
+	rows, err := DB.Query(SelectAllBoardsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i BoardSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.ProjectId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateBoard(title string, projectId int) sql.Result {
 	stmt, err := DB.Prepare(CreateBoardSql)
 	if err != nil {
@@ -79,6 +131,35 @@ func DeleteBoard(id int) {
 }
 
 // labels
+type LabelSql struct {
+	Id        int
+	Title     string
+	Color     string
+	ProjectId int
+}
+
+func GetAllLabels() []LabelSql {
+	var items []LabelSql
+	rows, err := DB.Query(SelectAllLabelsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i LabelSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Color,
+			&i.ProjectId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateLabel(title string, color string, projectId int) sql.Result {
 	stmt, err := DB.Prepare(CreateLabelSql)
 	if err != nil {
@@ -127,6 +208,35 @@ func DeleteLabel(id int) {
 }
 
 // cards
+type CardSql struct {
+	Id      int
+	Title   string
+	Desc    sql.NullString
+	BoardId int
+}
+
+func GetAllCards() []CardSql {
+	var items []CardSql
+	rows, err := DB.Query(SelectAllCardsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CardSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Desc,
+			&i.BoardId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateCard(title string, boardId int) sql.Result {
 	stmt, err := DB.Prepare(CreateCardSql)
 	if err != nil {
@@ -187,6 +297,31 @@ func DeleteCard(id int) {
 }
 
 // card_labels
+type CardLabelSql struct {
+	CardId  int
+	LabelId int
+}
+
+func GetAllCardLabels() []CardLabelSql {
+	var items []CardLabelSql
+	rows, err := DB.Query(SelectAllCardLabelsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CardLabelSql
+		if err := rows.Scan(
+			&i.CardId,
+			&i.LabelId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateCardLabel(cardId int, labelId int) sql.Result {
 	stmt, err := DB.Prepare(CreateCardLabelSql)
 	if err != nil {
@@ -211,6 +346,34 @@ func DeleteCardLabel(id int) {
 }
 
 // check_items
+type CheckItemSql struct {
+	Id     int
+	Title  string
+	Done   int
+	CardId int
+}
+
+func GetAllCheckItems() []CheckItemSql {
+	var items []CheckItemSql
+	rows, err := DB.Query(SelectAllCheckItemsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CheckItemSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Done,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateCheckItem(title string, done int, cardId int) sql.Result {
 	stmt, err := DB.Prepare(CreateCheckItemSql)
 	if err != nil {

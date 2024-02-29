@@ -70,7 +70,9 @@ func NewMenu() Menu {
 	m := Menu{
 		menu:      kanban.StartMenu(),
 		textinput: textinput.New(),
-		empty:     true,
+	}
+	if len(storage.ProjectsSql) == 0 {
+		m.empty = true
 	}
 	m.setTxtInput()
 	setMenuDelegate()

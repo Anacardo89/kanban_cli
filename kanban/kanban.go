@@ -12,6 +12,7 @@ package kanban
 
 import (
 	"github.com/Anacardo89/ds/lists/dll"
+	"github.com/google/uuid"
 )
 
 type Menu struct {
@@ -19,26 +20,26 @@ type Menu struct {
 }
 
 type Project struct {
-	Id     int
+	Id     uuid.UUID
 	Title  string
 	Boards dll.DLL
 	Labels dll.DLL
 }
 
 type Board struct {
-	Id    int
+	Id    uuid.UUID
 	Title string
 	Cards dll.DLL
 }
 
 type Label struct {
-	Id    int
+	Id    uuid.UUID
 	Title string
 	Color string
 }
 
 type Card struct {
-	Id          int
+	Id          uuid.UUID
 	Title       string
 	Description string
 	CheckList   dll.DLL
@@ -46,7 +47,7 @@ type Card struct {
 }
 
 type CheckItem struct {
-	Id    int
+	Id    uuid.UUID
 	Title string
 	Check bool
 }
@@ -58,7 +59,7 @@ func StartMenu() *Menu {
 	}
 }
 
-func (m *Menu) AddProject(id int, title string) {
+func (m *Menu) AddProject(id uuid.UUID, title string) {
 	project := &Project{
 		Id:     id,
 		Title:  title,
@@ -78,7 +79,7 @@ func (p *Project) RenameProject(title string) {
 	p.Title = title
 }
 
-func (p *Project) AddBoard(id int, title string) {
+func (p *Project) AddBoard(id uuid.UUID, title string) {
 	board := &Board{
 		Id:    id,
 		Title: title,
@@ -92,7 +93,7 @@ func (p *Project) RemoveBoard(board *Board) error {
 	return err
 }
 
-func (p *Project) AddLabel(id int, title string, color string) {
+func (p *Project) AddLabel(id uuid.UUID, title string, color string) {
 	label := &Label{
 		Id:    id,
 		Title: title,
@@ -120,12 +121,13 @@ func (b *Board) RenameBoard(title string) {
 	b.Title = title
 }
 
-func (b *Board) AddCard(id int, title string) {
+func (b *Board) AddCard(id uuid.UUID, title string, desc string) {
 	card := &Card{
-		Id:         id,
-		Title:      title,
-		CheckList:  dll.New(),
-		CardLabels: dll.New(),
+		Id:          id,
+		Title:       title,
+		Description: desc,
+		CheckList:   dll.New(),
+		CardLabels:  dll.New(),
 	}
 	b.Cards.Append(card)
 }
@@ -144,11 +146,11 @@ func (c *Card) AddDescription(description string) {
 	c.Description = description
 }
 
-func (c *Card) AddCheckItem(id int, title string) {
+func (c *Card) AddCheckItem(id uuid.UUID, title string, done bool) {
 	checkItem := &CheckItem{
 		Id:    id,
 		Title: title,
-		Check: false,
+		Check: done,
 	}
 	c.CheckList.Append(checkItem)
 }
