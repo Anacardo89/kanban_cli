@@ -251,8 +251,9 @@ func (p *Project) setInput() {
 
 // list
 var (
-	cardDelegate = NewCardDelegate()
-	moveDelegate CardDelegate
+	unfocusedCardDelegate = NewUnfocusedCardDelegate()
+	cardDelegate          = NewCardDelegate()
+	moveDelegate          CardDelegate
 )
 
 func setMoveDelegate() {
@@ -271,15 +272,24 @@ func (p *Project) setLists() {
 	if node == nil {
 		return
 	}
-	var boards []list.Model
+	var (
+		boards []list.Model
+		l      list.Model
+		err    error
+	)
 	board := node.Val().(*kanban.Board)
 	for i := 0; i < p.project.Boards.Length(); i++ {
-		l, err := p.listFromBoard(board)
+		if p.cursor == i {
+			l, err = p.listFromBoard(board, true)
+		} else {
+			l, err = p.listFromBoard(board, false)
+		}
 		if err != nil {
 			logger.Error.Fatal(err)
 			return
 		}
 		boards = append(boards, l)
+
 		node, _ = node.Next()
 		if node != nil {
 			board = node.Val().(*kanban.Board)
@@ -288,9 +298,16 @@ func (p *Project) setLists() {
 	p.boards = boards
 }
 
-func (p *Project) listFromBoard(b *kanban.Board) (list.Model, error) {
-	var items []list.Item
-	l := list.New([]list.Item{}, cardDelegate, ws.width/3, ws.height-9)
+func (p *Project) listFromBoard(b *kanban.Board, selected bool) (list.Model, error) {
+	var (
+		l     list.Model
+		items []list.Item
+	)
+	if selected {
+		l = list.New([]list.Item{}, cardDelegate, ws.width/3, ws.height-9)
+	} else {
+		l = list.New([]list.Item{}, unfocusedCardDelegate, ws.width/3, ws.height-9)
+	}
 	l.SetShowHelp(false)
 	l.Title = b.Title
 	l.InfiniteScrolling = true

@@ -261,6 +261,20 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 		}
 		s.update = upNone
 		s.sl = s.l.getLabel()
+		cl, _ := s.sc.CardLabels.HeadNode()
+		if cl != nil {
+			s.sc.AddLabel(s.sl)
+			s.sl = nil
+			return func() tea.Msg { return upCard }
+		}
+		for i := 0; i < s.sc.CardLabels.Length(); i++ {
+			clVal := cl.Val().(*kanban.Label)
+			if s.sl.Id == clVal.Id {
+				s.sl = nil
+				return func() tea.Msg { return upCard }
+			}
+			cl, _ = cl.Next()
+		}
 		s.sc.AddLabel(s.sl)
 		s.sl = nil
 		return func() tea.Msg { return upCard }
