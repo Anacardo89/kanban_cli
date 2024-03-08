@@ -207,11 +207,10 @@ func (c *Card) txtInputEnter() {
 			ci.RenameCheckItem(c.textinput.Value())
 		} else {
 			res := storage.CreateCheckItem(c.textinput.Value(), 0, c.card.Id)
-			id64, err := (res.LastInsertId())
+			id, err := (res.LastInsertId())
 			if err != nil {
 				logger.Error.Fatal(err)
 			}
-			id := int(id64)
 			c.card.AddCheckItem(id, c.textinput.Value(), false)
 		}
 	}

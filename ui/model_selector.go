@@ -104,6 +104,7 @@ func (s *Selector) loadProjects() {
 			storage.ProjectsSql[i].Title,
 		)
 	}
+	s.m.UpdateMenu()
 }
 
 func (s *Selector) loadLabels() {

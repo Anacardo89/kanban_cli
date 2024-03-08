@@ -114,11 +114,10 @@ func (p *Project) txtInputEnter() {
 	switch p.flag {
 	case nBoard:
 		res := storage.CreateBoard(p.textinput.Value(), p.project.Id)
-		id64, err := res.LastInsertId()
+		id, err := res.LastInsertId()
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
-		id := int(id64)
 		p.project.AddBoard(id, p.textinput.Value())
 		if p.empty {
 			p.empty = false
@@ -128,11 +127,10 @@ func (p *Project) txtInputEnter() {
 	case nCard:
 		b := p.getBoard()
 		res := storage.CreateCard(p.textinput.Value(), b.Id)
-		id64, err := res.LastInsertId()
+		id, err := res.LastInsertId()
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
-		id := int(id64)
 		b.AddCard(id, p.textinput.Value(), "")
 		p.emptyBoard[p.cursor] = false
 	case rename:

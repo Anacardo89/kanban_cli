@@ -148,11 +148,10 @@ func (m *Menu) txtInputEnter() {
 		m.flag = none
 	} else {
 		res := storage.CreateProject(m.textinput.Value())
-		id64, err := (res.LastInsertId())
+		id, err := (res.LastInsertId())
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
-		id := int(id64)
 		m.menu.AddProject(id, m.textinput.Value())
 		m.empty = false
 	}

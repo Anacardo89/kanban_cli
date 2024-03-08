@@ -180,11 +180,10 @@ func (l *Label) txtInputEnter() {
 		}
 		tmpColor = string('#') + tmpColor
 		res := storage.CreateLabel(tmpTitle, tmpColor, l.project.Id)
-		id64, err := (res.LastInsertId())
+		id, err := (res.LastInsertId())
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
-		id := int(id64)
 		l.project.AddLabel(id, tmpTitle, tmpColor)
 		l.empty = false
 		l.setList()

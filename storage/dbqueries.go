@@ -8,7 +8,7 @@ import (
 
 // projects
 type ProjectSql struct {
-	Id    int
+	Id    int64
 	Title string
 }
 
@@ -44,7 +44,7 @@ func CreateProject(title string) sql.Result {
 	return res
 }
 
-func UpdateProject(id int, title string) sql.Result {
+func UpdateProject(id int64, title string) sql.Result {
 	stmt, err := DB.Prepare(UpdateProjectSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -56,7 +56,7 @@ func UpdateProject(id int, title string) sql.Result {
 	return res
 }
 
-func DeleteProject(id int) {
+func DeleteProject(id int64) {
 	stmt, err := DB.Prepare(DeleteProjectSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -69,9 +69,9 @@ func DeleteProject(id int) {
 
 // boards
 type BoardSql struct {
-	Id        int
+	Id        int64
 	Title     string
-	ProjectId int
+	ProjectId int64
 }
 
 func GetAllBoards() []BoardSql {
@@ -95,7 +95,7 @@ func GetAllBoards() []BoardSql {
 	return items
 }
 
-func CreateBoard(title string, projectId int) sql.Result {
+func CreateBoard(title string, projectId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateBoardSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -107,7 +107,7 @@ func CreateBoard(title string, projectId int) sql.Result {
 	return res
 }
 
-func UpdateBoard(id int, title string) sql.Result {
+func UpdateBoard(id int64, title string) sql.Result {
 	stmt, err := DB.Prepare(UpdateBoardSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -119,7 +119,7 @@ func UpdateBoard(id int, title string) sql.Result {
 	return res
 }
 
-func DeleteBoard(id int) {
+func DeleteBoard(id int64) {
 	stmt, err := DB.Prepare(DeleteBoardSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -132,10 +132,10 @@ func DeleteBoard(id int) {
 
 // labels
 type LabelSql struct {
-	Id        int
+	Id        int64
 	Title     string
 	Color     string
-	ProjectId int
+	ProjectId int64
 }
 
 func GetAllLabels() []LabelSql {
@@ -160,7 +160,7 @@ func GetAllLabels() []LabelSql {
 	return items
 }
 
-func CreateLabel(title string, color string, projectId int) sql.Result {
+func CreateLabel(title string, color string, projectId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateLabelSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -172,7 +172,7 @@ func CreateLabel(title string, color string, projectId int) sql.Result {
 	return res
 }
 
-func UpdateLabelTitle(id int, title string) sql.Result {
+func UpdateLabelTitle(id int64, title string) sql.Result {
 	stmt, err := DB.Prepare(UpdateLabelTitleSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -184,7 +184,7 @@ func UpdateLabelTitle(id int, title string) sql.Result {
 	return res
 }
 
-func UpdateLabelColor(id int, color string) sql.Result {
+func UpdateLabelColor(id int64, color string) sql.Result {
 	stmt, err := DB.Prepare(UpdateLabelColorSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -196,7 +196,7 @@ func UpdateLabelColor(id int, color string) sql.Result {
 	return res
 }
 
-func DeleteLabel(id int) {
+func DeleteLabel(id int64) {
 	stmt, err := DB.Prepare(DeleteLabelSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -209,10 +209,10 @@ func DeleteLabel(id int) {
 
 // cards
 type CardSql struct {
-	Id      int
+	Id      int64
 	Title   string
 	Desc    sql.NullString
-	BoardId int
+	BoardId int64
 }
 
 func GetAllCards() []CardSql {
@@ -237,7 +237,7 @@ func GetAllCards() []CardSql {
 	return items
 }
 
-func CreateCard(title string, boardId int) sql.Result {
+func CreateCard(title string, boardId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateCardSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -249,7 +249,7 @@ func CreateCard(title string, boardId int) sql.Result {
 	return res
 }
 
-func UpdateCardTitle(id int, title string) sql.Result {
+func UpdateCardTitle(id int64, title string) sql.Result {
 	stmt, err := DB.Prepare(UpdateCardTitleSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -261,7 +261,7 @@ func UpdateCardTitle(id int, title string) sql.Result {
 	return res
 }
 
-func UpdateCardDesc(id int, desc string) sql.Result {
+func UpdateCardDesc(id int64, desc string) sql.Result {
 	stmt, err := DB.Prepare(UpdateCardDescSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -273,7 +273,7 @@ func UpdateCardDesc(id int, desc string) sql.Result {
 	return res
 }
 
-func UpdateCardParent(id int, boardId int) sql.Result {
+func UpdateCardParent(id int64, boardId int64) sql.Result {
 	stmt, err := DB.Prepare(UpdateCardParentSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -285,7 +285,7 @@ func UpdateCardParent(id int, boardId int) sql.Result {
 	return res
 }
 
-func DeleteCard(id int) {
+func DeleteCard(id int64) {
 	stmt, err := DB.Prepare(DeleteCardSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -298,8 +298,8 @@ func DeleteCard(id int) {
 
 // card_labels
 type CardLabelSql struct {
-	CardId  int
-	LabelId int
+	CardId  int64
+	LabelId int64
 }
 
 func GetAllCardLabels() []CardLabelSql {
@@ -322,7 +322,7 @@ func GetAllCardLabels() []CardLabelSql {
 	return items
 }
 
-func CreateCardLabel(cardId int, labelId int) sql.Result {
+func CreateCardLabel(cardId int64, labelId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateCardLabelSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -334,12 +334,12 @@ func CreateCardLabel(cardId int, labelId int) sql.Result {
 	return res
 }
 
-func DeleteCardLabel(id int) {
+func DeleteCardLabel(labelId int64) {
 	stmt, err := DB.Prepare(DeleteCardLabelSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
 	}
-	_, err = stmt.Exec(id)
+	_, err = stmt.Exec(labelId)
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt, err)
 	}
@@ -347,10 +347,10 @@ func DeleteCardLabel(id int) {
 
 // check_items
 type CheckItemSql struct {
-	Id     int
+	Id     int64
 	Title  string
 	Done   int
-	CardId int
+	CardId int64
 }
 
 func GetAllCheckItems() []CheckItemSql {
@@ -374,7 +374,7 @@ func GetAllCheckItems() []CheckItemSql {
 	return items
 }
 
-func CreateCheckItem(title string, done int, cardId int) sql.Result {
+func CreateCheckItem(title string, done int, cardId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateCheckItemSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -386,7 +386,7 @@ func CreateCheckItem(title string, done int, cardId int) sql.Result {
 	return res
 }
 
-func UpdateCheckItemTitle(id int, title string) sql.Result {
+func UpdateCheckItemTitle(id int64, title string) sql.Result {
 	stmt, err := DB.Prepare(UpdateCheckItemTitleSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -398,7 +398,7 @@ func UpdateCheckItemTitle(id int, title string) sql.Result {
 	return res
 }
 
-func UpdateCheckItemDone(id int, done int) sql.Result {
+func UpdateCheckItemDone(id int64, done int) sql.Result {
 	stmt, err := DB.Prepare(UpdateCheckItemDoneSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
@@ -410,7 +410,7 @@ func UpdateCheckItemDone(id int, done int) sql.Result {
 	return res
 }
 
-func DeleteCheckItem(id int) {
+func DeleteCheckItem(id int64) {
 	stmt, err := DB.Prepare(DeleteCheckItemSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
