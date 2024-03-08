@@ -19,26 +19,26 @@ type Menu struct {
 }
 
 type Project struct {
-	Id     int
+	Id     int64
 	Title  string
 	Boards dll.DLL
 	Labels dll.DLL
 }
 
 type Board struct {
-	Id    int
+	Id    int64
 	Title string
 	Cards dll.DLL
 }
 
 type Label struct {
-	Id    int
+	Id    int64
 	Title string
 	Color string
 }
 
 type Card struct {
-	Id          int
+	Id          int64
 	Title       string
 	Description string
 	CheckList   dll.DLL
@@ -46,7 +46,7 @@ type Card struct {
 }
 
 type CheckItem struct {
-	Id    int
+	Id    int64
 	Title string
 	Check bool
 }
@@ -58,7 +58,7 @@ func StartMenu() *Menu {
 	}
 }
 
-func (m *Menu) AddProject(id int, title string) {
+func (m *Menu) AddProject(id int64, title string) {
 	project := &Project{
 		Id:     id,
 		Title:  title,
@@ -78,7 +78,7 @@ func (p *Project) RenameProject(title string) {
 	p.Title = title
 }
 
-func (p *Project) AddBoard(id int, title string) {
+func (p *Project) AddBoard(id int64, title string) {
 	board := &Board{
 		Id:    id,
 		Title: title,
@@ -92,7 +92,7 @@ func (p *Project) RemoveBoard(board *Board) error {
 	return err
 }
 
-func (p *Project) AddLabel(id int, title string, color string) {
+func (p *Project) AddLabel(id int64, title string, color string) {
 	label := &Label{
 		Id:    id,
 		Title: title,
@@ -120,12 +120,13 @@ func (b *Board) RenameBoard(title string) {
 	b.Title = title
 }
 
-func (b *Board) AddCard(id int, title string) {
+func (b *Board) AddCard(id int64, title string, desc string) {
 	card := &Card{
-		Id:         id,
-		Title:      title,
-		CheckList:  dll.New(),
-		CardLabels: dll.New(),
+		Id:          id,
+		Title:       title,
+		Description: desc,
+		CheckList:   dll.New(),
+		CardLabels:  dll.New(),
 	}
 	b.Cards.Append(card)
 }
@@ -144,11 +145,11 @@ func (c *Card) AddDescription(description string) {
 	c.Description = description
 }
 
-func (c *Card) AddCheckItem(id int, title string) {
+func (c *Card) AddCheckItem(id int64, title string, done bool) {
 	checkItem := &CheckItem{
 		Id:    id,
 		Title: title,
-		Check: false,
+		Check: done,
 	}
 	c.CheckList.Append(checkItem)
 }

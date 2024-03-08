@@ -42,6 +42,8 @@ const (
 
 	// queries
 	// projects
+	SelectAllProjectsSql = `
+	SELECT * FROM projects;`
 	CreateProjectSql = `
 	INSERT INTO projects (title)
 		VALUES ($1)
@@ -52,10 +54,12 @@ const (
 		WHERE id = $1
 		RETURNING *;`
 	DeleteProjectSql = `
-		DELETE FROM projects
+	DELETE FROM projects
 		WHERE id = $1;`
 
 	// boards
+	SelectAllBoardsSql = `
+	SELECT * FROM boards;`
 	CreateBoardSql = `
 	INSERT INTO boards (title, project_id)
 		VALUES ($1, $2)
@@ -70,6 +74,8 @@ const (
 		WHERE id = $1;`
 
 	// labels
+	SelectAllLabelsSql = `
+	SELECT * FROM labels;`
 	CreateLabelSql = `
 	INSERT INTO labels (title, color, project_id)
 		VALUES ($1, $2, $3)
@@ -89,6 +95,8 @@ const (
 		WHERE id = $1;`
 
 	// cards
+	SelectAllCardsSql = `
+	SELECT * FROM cards;`
 	CreateCardSql = `
 	INSERT INTO cards (title, board_id)
 		VALUES ($1, $2)
@@ -113,6 +121,8 @@ const (
 		WHERE id = $1;`
 
 	// card_labels
+	SelectAllCardLabelsSql = `
+	SELECT * FROM card_labels;`
 	CreateCardLabelSql = `
 	INSERT INTO card_labels (card_id, label_id)
 		VALUES ($1, $2)
@@ -122,6 +132,8 @@ const (
 		WHERE label_id = $1;`
 
 	// check_items
+	SelectAllCheckItemsSql = `
+	SELECT * FROM boards;`
 	CreateCheckItemSql = `
 	INSERT INTO check_items (title, done, card_id)
 		VALUES ($1, $2, $3)
@@ -139,43 +151,4 @@ const (
 	DeleteCheckItemSql = `
 	DELETE FROM check_items
 		WHERE id = $1;`
-
-	// CreateDBsql = `
-	// CREATE TABLE IF NOT EXISTS projects (
-	// 	id INTEGER PRIMARY KEY,
-	// 	title TEXT NOT NULL
-	// );
-
-	// CREATE TABLE IF NOT EXISTS boards (
-	// 	id INTEGER PRIMARY KEY,
-	// 	title TEXT NOT NULL,
-	// 	project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
-	// );
-
-	// CREATE TABLE IF NOT EXISTS labels (
-	// 	id INTEGER PRIMARY KEY,
-	// 	title TEXT NOT NULL,
-	// 	color TEXT NOT NULL,
-	// 	project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
-	// );
-
-	// CREATE TABLE IF NOT EXISTS cards (
-	// 	id INTEGER PRIMARY KEY,
-	// 	title TEXT NOT NULL,
-	// 	card_desc TEXT,
-	// 	board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE
-	// );
-
-	// CREATE TABLE IF NOT EXISTS card_labels (
-	// 	card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-	// 	label_id INTEGER NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
-	// 	UNIQUE(card_id, label_id)
-	// );
-
-	// CREATE TABLE IF NOT EXISTS check_items (
-	// 	id INTEGER PRIMARY KEY,
-	// 	title TEXT NOT NULL,
-	// 	check INTEGER NOT NULL,
-	// 	card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE
-	// );`
 )

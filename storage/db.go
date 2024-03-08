@@ -11,11 +11,18 @@ import (
 const (
 	ErrCreatSQLstmt string = "Error creating SQL statement:"
 	ErrExecSQLstmt  string = "Error executing SQL statement:"
+	ErrSQLrowScan   string = "Error scanning rows:"
 )
 
 var (
-	DB     *sql.DB
-	dbPath string
+	dbPath        string
+	DB            *sql.DB
+	ProjectsSql   []ProjectSql
+	BoardsSql     []BoardSql
+	LabelsSql     []LabelSql
+	CardsSql      []CardSql
+	CardLabelsSql []CardLabelSql
+	CheckItemsSql []CheckItemSql
 )
 
 func DBExists() bool {
@@ -23,7 +30,7 @@ func DBExists() bool {
 	if err != nil {
 		logger.Error.Fatal("Cannot extract HOME:", err)
 	}
-	dbPath = home + "/.kanboards/db.db"
+	dbPath = home + "/kanboards/db.db"
 	_, err = os.Open(dbPath)
 	return err == nil
 }
@@ -35,6 +42,12 @@ func SetDB() {
 		logger.Error.Fatal("Cannot establish DB connection:", err)
 		err = nil
 	}
+	ProjectsSql = GetAllProjects()
+	BoardsSql = GetAllBoards()
+	LabelsSql = GetAllLabels()
+	CardsSql = GetAllCards()
+	CardLabelsSql = GetAllCardLabels()
+	CheckItemsSql = GetAllCheckItems()
 }
 
 func CreateDB() {
@@ -108,5 +121,5 @@ func CreateDBfile() {
 	if err != nil {
 		logger.Error.Println("Cannot extract HOME:", err)
 	}
-	os.Mkdir(home+"/.kanboards", 0755)
+	os.Mkdir(home+"/kanboards", 0755)
 }

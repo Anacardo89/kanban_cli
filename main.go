@@ -22,6 +22,7 @@ func main() {
 		storage.CreateDBfile()
 		storage.CreateDB()
 	}
+	defer storage.DB.Close()
 
 	p := tea.NewProgram(ui.New(), tea.WithAltScreen())
 	_, err = p.Run()
