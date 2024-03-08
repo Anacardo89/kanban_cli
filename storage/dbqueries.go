@@ -274,6 +274,8 @@ func UpdateCardDesc(id int64, desc string) sql.Result {
 }
 
 func UpdateCardParent(id int64, boardId int64) sql.Result {
+	logger.Info.Println("card id:", id)
+	logger.Info.Println("board id:", boardId)
 	stmt, err := DB.Prepare(UpdateCardParentSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)

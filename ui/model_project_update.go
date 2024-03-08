@@ -352,7 +352,6 @@ func (p *Project) moveCard() {
 	boardTo := p.getBoard()
 	c, err := boardFrom.(*kanban.Board).Cards.GetAt(p.moveFrom[1])
 	if err != nil {
-		logger.Error.Fatal(err)
 		return
 	}
 	cardVal := *c.(*kanban.Card)
