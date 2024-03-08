@@ -283,6 +283,7 @@ func (c *Card) handleMoveRight() {
 	} else {
 		c.cursor++
 	}
+	c.setLists()
 }
 
 func (c *Card) handleMoveLeft() {
@@ -291,6 +292,7 @@ func (c *Card) handleMoveLeft() {
 	} else {
 		c.cursor--
 	}
+	c.setLists()
 }
 
 // View
@@ -410,7 +412,10 @@ func (c *Card) setTxtArea() {
 }
 
 // list
-var checklistDelegate = NewCheckListDelegate()
+var (
+	checklistDelegate          = NewCheckListDelegate()
+	unfocusedCheckListDelegate = NewUnfocusedCheckListDelegate()
+)
 
 func (c *Card) setLists() {
 	c.setCheckList()
@@ -418,8 +423,15 @@ func (c *Card) setLists() {
 }
 
 func (c *Card) setCheckList() {
-	var checklistItems []list.Item
-	cl := list.New([]list.Item{}, checklistDelegate, ws.width/2, ws.height/3+1)
+	var (
+		checklistItems []list.Item
+		cl             list.Model
+	)
+	if c.cursor == checkPos {
+		cl = list.New([]list.Item{}, checklistDelegate, ws.width/2, ws.height/3+1)
+	} else {
+		cl = list.New([]list.Item{}, unfocusedCheckListDelegate, ws.width/2, ws.height/3+1)
+	}
 	cl.SetShowHelp(false)
 	cl.Title = "Checklist"
 	cl.InfiniteScrolling = true

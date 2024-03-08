@@ -290,6 +290,7 @@ func (p *Project) moveLeft() {
 	} else {
 		p.cursor--
 	}
+	p.setLists()
 }
 
 func (p *Project) moveRight() {
@@ -301,6 +302,7 @@ func (p *Project) moveRight() {
 	} else {
 		p.cursor++
 	}
+	p.setLists()
 }
 
 // new
