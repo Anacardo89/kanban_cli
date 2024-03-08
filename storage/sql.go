@@ -50,12 +50,12 @@ const (
 		RETURNING *;`
 	UpdateProjectSql = `
 	UPDATE projects
-		SET title = $2
-		WHERE id = $1
+		SET title = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	DeleteProjectSql = `
 	DELETE FROM projects
-		WHERE id = $1;`
+		WHERE id = ?1;`
 
 	// boards
 	SelectAllBoardsSql = `
@@ -66,12 +66,12 @@ const (
 		RETURNING *;`
 	UpdateBoardSql = `
 	UPDATE boards
-		SET title = $2
-		WHERE id = $1
+		SET title = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	DeleteBoardSql = `
 	DELETE FROM boards
-		WHERE id = $1;`
+		WHERE id = ?1;`
 
 	// labels
 	SelectAllLabelsSql = `
@@ -82,17 +82,17 @@ const (
 		RETURNING *;`
 	UpdateLabelTitleSql = `
 	UPDATE labels
-		SET title = $2
-		WHERE id = $1
+		SET title = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	UpdateLabelColorSql = `
 	UPDATE labels
-		SET color = $2
-		WHERE id = $1
+		SET color = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	DeleteLabelSql = `
 	DELETE FROM labels
-		WHERE id = $1;`
+		WHERE id = ?1;`
 
 	// cards
 	SelectAllCardsSql = `
@@ -103,22 +103,22 @@ const (
 		RETURNING *;`
 	UpdateCardTitleSql = `
 	UPDATE cards
-		SET title = $2
-		WHERE id = $1
+		SET title = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	UpdateCardDescSql = `
 	UPDATE cards
-		SET card_desc = $2
-		WHERE id = $1
+		SET card_desc = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	UpdateCardParentSql = `
 	UPDATE cards
-		SET board_id = $2
-		WHERE id = $1
+		SET board_id = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	DeleteCardSql = `
 	DELETE FROM cards
-		WHERE id = $1;`
+		WHERE id = ?1;`
 
 	// card_labels
 	SelectAllCardLabelsSql = `
@@ -129,7 +129,7 @@ const (
 		RETURNING *;`
 	DeleteCardLabelSql = `
 	DELETE FROM card_labels
-		WHERE label_id = $1;`
+		WHERE label_id = ?1;`
 
 	// check_items
 	SelectAllCheckItemsSql = `
@@ -140,15 +140,15 @@ const (
 		RETURNING *;`
 	UpdateCheckItemTitleSql = `
 	UPDATE check_items
-		SET title = $2
-		WHERE id = $1
+		SET title = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	UpdateCheckItemDoneSql = `
 	UPDATE check_items
-		SET done = $2
-		WHERE id = $1
+		SET done = ?2
+		WHERE id = ?1
 		RETURNING *;`
 	DeleteCheckItemSql = `
 	DELETE FROM check_items
-		WHERE id = $1;`
+		WHERE id = ?1;`
 )
