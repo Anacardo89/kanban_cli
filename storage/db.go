@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"os"
 
-	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanboards/logger"
 	_ "github.com/mattn/go-sqlite3"
 )
 

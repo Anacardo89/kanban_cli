@@ -5,8 +5,8 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/Anacardo89/kanban_cli/kanban"
-	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanboards/kanban"
+	"github.com/Anacardo89/kanboards/logger"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

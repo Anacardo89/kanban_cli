@@ -2,9 +2,9 @@ package ui
 
 import (
 	"github.com/Anacardo89/ds/lists/queue"
-	"github.com/Anacardo89/kanban_cli/kanban"
-	"github.com/Anacardo89/kanban_cli/logger"
-	"github.com/Anacardo89/kanban_cli/storage"
+	"github.com/Anacardo89/kanboards/kanban"
+	"github.com/Anacardo89/kanboards/logger"
+	"github.com/Anacardo89/kanboards/storage"
 )
 
 func (s *Selector) loadKanban() {
@@ -47,7 +47,8 @@ func (s *Selector) QueueToKanban(q queue.Queue) {
 		b *kanban.Board
 		c *kanban.Card
 	)
-	for i := 0; i < q.Length(); i++ {
+	len := q.Length()
+	for i := 0; i < len; i++ {
 		val, err := q.Dequeue()
 		if err != nil {
 			logger.Error.Println("Could not read from load queue:", err)
@@ -58,22 +59,24 @@ func (s *Selector) QueueToKanban(q queue.Queue) {
 			s.m.menu.AddProject(v.Id, v.Title)
 			p = s.m.menu.GetProjectById(v.Id)
 		case storage.LabelSql:
-			if c == nil {
-				p.AddLabel(v.Id, v.Title, v.Color)
-			} else {
-				l := p.GetLabelById(v.Id)
-				c.AddLabel(l)
-			}
-		case *kanban.Board:
+			p.AddLabel(v.Id, v.Title, v.Color)
+		case storage.BoardSql:
 			c = nil
 			p.AddBoard(v.Id, v.Title)
 			b = p.GetBoardById(v.Id)
-		case *kanban.Card:
-			b.AddCard(v.Id, v.Title, v.Description)
+		case storage.CardSql:
+			desc := v.Desc.String
+			b.AddCard(v.Id, v.Title, desc)
 			c = b.GetCardById(v.Id)
-		case *kanban.CheckItem:
-			c.AddCheckItem(v.Id, v.Title, v.Check)
-
+		case storage.CheckItemSql:
+			done := false
+			if v.Done == 1 {
+				done = true
+			}
+			c.AddCheckItem(v.Id, v.Title, done)
+		case storage.CardLabelSql:
+			l := p.GetLabelById(v.LabelId)
+			c.AddLabel(l)
 		}
 	}
 }

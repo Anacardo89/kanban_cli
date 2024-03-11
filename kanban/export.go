@@ -1,7 +1,7 @@
 package kanban
 
 import (
-	"github.com/Anacardo89/kanban_cli/storage"
+	"github.com/Anacardo89/kanboards/storage"
 )
 
 func (m *Menu) ToStorage() *storage.Menu {

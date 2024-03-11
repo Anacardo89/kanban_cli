@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanboards/logger"
 	"gopkg.in/yaml.v2"
 )
 

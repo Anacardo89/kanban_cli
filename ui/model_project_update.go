@@ -3,9 +3,9 @@ package ui
 import (
 	"strings"
 
-	"github.com/Anacardo89/kanban_cli/kanban"
-	"github.com/Anacardo89/kanban_cli/logger"
-	"github.com/Anacardo89/kanban_cli/storage"
+	"github.com/Anacardo89/kanboards/kanban"
+	"github.com/Anacardo89/kanboards/logger"
+	"github.com/Anacardo89/kanboards/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
