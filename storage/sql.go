@@ -60,9 +60,12 @@ const (
 	// boards
 	SelectAllBoardsSql = `
 	SELECT * FROM boards;`
+	SelectBoardsWithParentSql = `
+	SELECT * FROM boards
+		WHERE project_id = ?1;`
 	CreateBoardSql = `
 	INSERT INTO boards (title, project_id)
-		VALUES ($1, $2)
+		VALUES (?1, ?2)
 		RETURNING *;`
 	UpdateBoardSql = `
 	UPDATE boards
@@ -76,6 +79,9 @@ const (
 	// labels
 	SelectAllLabelsSql = `
 	SELECT * FROM labels;`
+	SelectLabelsWithParentSql = `
+	SELECT * FROM labels
+		WHERE project_id = ?1;`
 	CreateLabelSql = `
 	INSERT INTO labels (title, color, project_id)
 		VALUES ($1, $2, $3)
@@ -97,6 +103,9 @@ const (
 	// cards
 	SelectAllCardsSql = `
 	SELECT * FROM cards;`
+	SelectCardsWithParentSql = `
+	SELECT * FROM cards
+		WHERE board_id = ?1;`
 	CreateCardSql = `
 	INSERT INTO cards (title, board_id)
 		VALUES ($1, $2)
@@ -123,6 +132,9 @@ const (
 	// card_labels
 	SelectAllCardLabelsSql = `
 	SELECT * FROM card_labels;`
+	SelectLabelsInCardSql = `
+	SELECT * FROM card_labels
+		WHERE card_id = ?1;`
 	CreateCardLabelSql = `
 	INSERT INTO card_labels (card_id, label_id)
 		VALUES ($1, $2)
@@ -133,7 +145,10 @@ const (
 
 	// check_items
 	SelectAllCheckItemsSql = `
-	SELECT * FROM boards;`
+	SELECT * FROM check_items;`
+	SelectCheckItemsWithParentSql = `
+	SELECT * FROM check_items
+		WHERE card_id = ?1;`
 	CreateCheckItemSql = `
 	INSERT INTO check_items (title, done, card_id)
 		VALUES ($1, $2, $3)

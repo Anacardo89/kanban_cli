@@ -3,7 +3,7 @@ module github.com/Anacardo89/kanban_cli
 go 1.22
 
 require (
-	github.com/Anacardo89/ds v0.0.0-20240123071052-4710299dc239
+	github.com/Anacardo89/ds v0.0.0-20240305183036-1f982baaf5dc
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1

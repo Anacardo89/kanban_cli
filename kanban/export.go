@@ -14,7 +14,7 @@ func (m *Menu) ToStorage() *storage.Menu {
 func (m *Menu) projectsToStorage() []storage.Project {
 	projects := []storage.Project{}
 	for i := 0; i < m.Projects.Length(); i++ {
-		projectNode, _ := m.Projects.WalkTo(i)
+		projectNode, _ := m.Projects.GetNodeAt(i)
 		projectVal := projectNode.Val().(*Project)
 		project := storage.Project{
 			Title:  projectVal.Title,
@@ -29,7 +29,7 @@ func (m *Menu) projectsToStorage() []storage.Project {
 func (p *Project) boardsToStorage() []storage.Board {
 	boards := []storage.Board{}
 	for i := 0; i < p.Boards.Length(); i++ {
-		boardNode, _ := p.Boards.WalkTo(i)
+		boardNode, _ := p.Boards.GetNodeAt(i)
 		boardVal := boardNode.Val().(*Board)
 		board := storage.Board{
 			Title: boardVal.Title,
@@ -43,7 +43,7 @@ func (p *Project) boardsToStorage() []storage.Board {
 func (p *Project) labelsToStorage() []storage.Label {
 	labels := []storage.Label{}
 	for i := 0; i < p.Labels.Length(); i++ {
-		labelNode, _ := p.Labels.WalkTo(i)
+		labelNode, _ := p.Labels.GetNodeAt(i)
 		labelVal := labelNode.Val().(*Label)
 		label := storage.Label{
 			Title: labelVal.Title,
@@ -57,7 +57,7 @@ func (p *Project) labelsToStorage() []storage.Label {
 func (b *Board) cardsToStorage() []storage.Card {
 	cards := []storage.Card{}
 	for i := 0; i < b.Cards.Length(); i++ {
-		cardNode, _ := b.Cards.WalkTo(i)
+		cardNode, _ := b.Cards.GetNodeAt(i)
 		cardVal := cardNode.Val().(*Card)
 		card := storage.Card{
 			Title:       cardVal.Title,
@@ -73,7 +73,7 @@ func (b *Board) cardsToStorage() []storage.Card {
 func (c *Card) checkListToStorage() []storage.CheckItem {
 	checkList := []storage.CheckItem{}
 	for i := 0; i < c.CheckList.Length(); i++ {
-		checkNode, _ := c.CheckList.WalkTo(i)
+		checkNode, _ := c.CheckList.GetNodeAt(i)
 		checkVal := checkNode.Val().(*CheckItem)
 		checkItem := storage.CheckItem{
 			Title: checkVal.Title,
@@ -87,7 +87,7 @@ func (c *Card) checkListToStorage() []storage.CheckItem {
 func (c *Card) cardLabelsToStorage() []storage.Label {
 	cardLabels := []storage.Label{}
 	for i := 0; i < c.CardLabels.Length(); i++ {
-		cardLabelNode, _ := c.CardLabels.WalkTo(i)
+		cardLabelNode, _ := c.CardLabels.GetNodeAt(i)
 		cardLabelVal := cardLabelNode.Val().(*Label)
 		cardLabel := storage.Label{
 			Title: cardLabelVal.Title,
