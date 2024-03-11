@@ -12,6 +12,7 @@ package kanban
 
 import (
 	"github.com/Anacardo89/ds/lists/dll"
+	"github.com/Anacardo89/kanban_cli/logger"
 )
 
 type Menu struct {
@@ -68,8 +69,22 @@ func (m *Menu) AddProject(id int64, title string) {
 	m.Projects.Append(project)
 }
 
+func (m *Menu) GetProjectById(id int64) *Project {
+	for i := 0; i < m.Projects.Length(); i++ {
+		curr, err := m.Projects.GetAt(i)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		c := curr.(*Project)
+		if c.Id == id {
+			return c
+		}
+	}
+	return nil
+}
+
 func (m *Menu) RemoveProject(project *Project) error {
-	_, err := m.Projects.Remove(project)
+	err := m.Projects.Remove(project)
 	return err
 }
 
@@ -87,8 +102,22 @@ func (p *Project) AddBoard(id int64, title string) {
 	p.Boards.Append(board)
 }
 
+func (p *Project) GetBoardById(id int64) *Board {
+	for i := 0; i < p.Boards.Length(); i++ {
+		curr, err := p.Boards.GetAt(i)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		c := curr.(*Board)
+		if c.Id == id {
+			return c
+		}
+	}
+	return nil
+}
+
 func (p *Project) RemoveBoard(board *Board) error {
-	_, err := p.Boards.Remove(board)
+	err := p.Boards.Remove(board)
 	return err
 }
 
@@ -101,8 +130,22 @@ func (p *Project) AddLabel(id int64, title string, color string) {
 	p.Labels.Append(label)
 }
 
+func (p *Project) GetLabelById(id int64) *Label {
+	for i := 0; i < p.Labels.Length(); i++ {
+		curr, err := p.Labels.GetAt(i)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		c := curr.(*Label)
+		if c.Id == id {
+			return c
+		}
+	}
+	return nil
+}
+
 func (p *Project) RemoveLabel(label *Label) error {
-	_, err := p.Labels.Remove(label)
+	err := p.Labels.Remove(label)
 	return err
 }
 
@@ -131,8 +174,22 @@ func (b *Board) AddCard(id int64, title string, desc string) {
 	b.Cards.Append(card)
 }
 
+func (b *Board) GetCardById(id int64) *Card {
+	for i := 0; i < b.Cards.Length(); i++ {
+		curr, err := b.Cards.GetAt(i)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		c := curr.(*Card)
+		if c.Id == id {
+			return c
+		}
+	}
+	return nil
+}
+
 func (b *Board) RemoveCard(card *Card) error {
-	_, err := b.Cards.Remove(card)
+	err := b.Cards.Remove(card)
 	return err
 }
 
@@ -154,8 +211,22 @@ func (c *Card) AddCheckItem(id int64, title string, done bool) {
 	c.CheckList.Append(checkItem)
 }
 
+func (c *Card) GetCheckItemById(id int64) *CheckItem {
+	for i := 0; i < c.CheckList.Length(); i++ {
+		curr, err := c.CheckList.GetAt(i)
+		if err != nil {
+			logger.Error.Println(err)
+		}
+		c := curr.(*CheckItem)
+		if c.Id == id {
+			return c
+		}
+	}
+	return nil
+}
+
 func (c *Card) RemoveCheckItem(checkItem *CheckItem) error {
-	_, err := c.CheckList.Remove(checkItem)
+	err := c.CheckList.Remove(checkItem)
 	return err
 }
 
@@ -164,7 +235,7 @@ func (c *Card) AddLabel(label *Label) {
 }
 
 func (c *Card) RemoveLabel(label *Label) error {
-	_, err := c.CardLabels.Remove(label)
+	err := c.CardLabels.Remove(label)
 	return err
 }
 

@@ -95,6 +95,27 @@ func GetAllBoards() []BoardSql {
 	return items
 }
 
+func GetBoardsWithParent(projectId int64) []BoardSql {
+	var items []BoardSql
+	rows, err := DB.Query(SelectBoardsWithParentSql, projectId)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i BoardSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.ProjectId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateBoard(title string, projectId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateBoardSql)
 	if err != nil {
@@ -141,6 +162,28 @@ type LabelSql struct {
 func GetAllLabels() []LabelSql {
 	var items []LabelSql
 	rows, err := DB.Query(SelectAllLabelsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i LabelSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Color,
+			&i.ProjectId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
+func GetLabelsWithParent(projectId int64) []LabelSql {
+	var items []LabelSql
+	rows, err := DB.Query(SelectLabelsWithParentSql, projectId)
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt)
 	}
@@ -218,6 +261,28 @@ type CardSql struct {
 func GetAllCards() []CardSql {
 	var items []CardSql
 	rows, err := DB.Query(SelectAllCardsSql)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CardSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Desc,
+			&i.BoardId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
+func GetCardsWithParent(boardId int64) []CardSql {
+	var items []CardSql
+	rows, err := DB.Query(SelectCardsWithParentSql, boardId)
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt)
 	}
@@ -324,6 +389,26 @@ func GetAllCardLabels() []CardLabelSql {
 	return items
 }
 
+func GetLabelsInCard(cardId int64) []CardLabelSql {
+	var items []CardLabelSql
+	rows, err := DB.Query(SelectLabelsInCardSql, cardId)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CardLabelSql
+		if err := rows.Scan(
+			&i.CardId,
+			&i.LabelId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
 func CreateCardLabel(cardId int64, labelId int64) sql.Result {
 	stmt, err := DB.Prepare(CreateCardLabelSql)
 	if err != nil {
@@ -368,6 +453,29 @@ func GetAllCheckItems() []CheckItemSql {
 			&i.Id,
 			&i.Title,
 			&i.Done,
+			&i.CardId,
+		); err != nil {
+			logger.Error.Println(ErrSQLrowScan, err)
+		}
+		items = append(items, i)
+	}
+	return items
+}
+
+func GetCheckItemsWithParent(cardId int64) []CheckItemSql {
+	var items []CheckItemSql
+	rows, err := DB.Query(SelectCheckItemsWithParentSql, cardId)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var i CheckItemSql
+		if err := rows.Scan(
+			&i.Id,
+			&i.Title,
+			&i.Done,
+			&i.CardId,
 		); err != nil {
 			logger.Error.Println(ErrSQLrowScan, err)
 		}

@@ -17,10 +17,10 @@ func main() {
 	defer f.Close()
 
 	if storage.DBExists() {
-		storage.SetDB()
+		storage.OpenDB()
 	} else {
 		storage.CreateDBfile()
-		storage.CreateDB()
+		storage.CreateDBTables()
 	}
 	defer storage.DB.Close()
 
