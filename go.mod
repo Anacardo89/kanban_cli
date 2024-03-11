@@ -1,4 +1,4 @@
-module github.com/Anacardo89/kanban_cli
+module github.com/Anacardo89/kanboards
 
 go 1.22
 

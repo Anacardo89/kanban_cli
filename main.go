@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/Anacardo89/kanban_cli/logger"
-	"github.com/Anacardo89/kanban_cli/storage"
-	"github.com/Anacardo89/kanban_cli/ui"
+	"github.com/Anacardo89/kanboards/logger"
+	"github.com/Anacardo89/kanboards/storage"
+	"github.com/Anacardo89/kanboards/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

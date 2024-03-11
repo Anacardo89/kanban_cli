@@ -12,7 +12,7 @@ package kanban
 
 import (
 	"github.com/Anacardo89/ds/lists/dll"
-	"github.com/Anacardo89/kanban_cli/logger"
+	"github.com/Anacardo89/kanboards/logger"
 )
 
 type Menu struct {

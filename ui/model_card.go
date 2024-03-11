@@ -3,9 +3,9 @@ package ui
 import (
 	"fmt"
 
-	"github.com/Anacardo89/kanban_cli/kanban"
-	"github.com/Anacardo89/kanban_cli/logger"
-	"github.com/Anacardo89/kanban_cli/storage"
+	"github.com/Anacardo89/kanboards/kanban"
+	"github.com/Anacardo89/kanboards/logger"
+	"github.com/Anacardo89/kanboards/storage"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -232,12 +232,12 @@ func (c *Card) enterKeyPress() tea.Cmd {
 			return nil
 		}
 		ci := c.getCheckItem()
+		ci.CheckCheckItem()
 		done := 0
 		if ci.Check {
 			done = 1
 		}
 		storage.UpdateCheckItemDone(ci.Id, done)
-		ci.CheckCheckItem()
 		c.setLists()
 	case labelPos:
 		return func() tea.Msg { return labelState }
@@ -415,7 +415,15 @@ func (c *Card) setTxtArea() {
 var (
 	checklistDelegate          = NewCheckListDelegate()
 	unfocusedCheckListDelegate = NewUnfocusedCheckListDelegate()
+	unfocusedCarlLabelDelegate = NewUnfocusedCardLabelDelegate()
 )
+
+func NewUnfocusedCardLabelDelegate() LabelListDelegate {
+	d := NewLabelListDelegate()
+	d.Styles.SelectedTitle.Foreground(WHITE)
+	d.ShowDescription = false
+	return d
+}
 
 func (c *Card) setLists() {
 	c.setCheckList()
@@ -452,8 +460,15 @@ func (c *Card) setCheckList() {
 }
 
 func (c *Card) setCardLabels() {
-	var labelItems []list.Item
-	ll := list.New([]list.Item{}, NewLabelListDelegate(), ws.width/2, ws.height/3+1)
+	var (
+		labelItems []list.Item
+		ll         list.Model
+	)
+	if c.cursor == labelPos {
+		ll = list.New([]list.Item{}, NewLabelListDelegate(), ws.width/2, ws.height/3+1)
+	} else {
+		ll = list.New([]list.Item{}, unfocusedCarlLabelDelegate, ws.width/2, ws.height/3+1)
+	}
 	ll.SetShowHelp(false)
 	ll.Title = "Card Labels"
 	ll.InfiniteScrolling = true

@@ -1,7 +1,8 @@
 package ui
 
 import (
-	"github.com/Anacardo89/kanban_cli/kanban"
+	"github.com/Anacardo89/kanboards/kanban"
+	"github.com/Anacardo89/kanboards/storage"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -106,6 +107,7 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 		s.sl = s.l.getLabel()
 		cl, _ := s.sc.CardLabels.HeadNode()
 		if cl != nil {
+			storage.CreateCardLabel(s.sc.Id, s.sl.Id)
 			s.sc.AddLabel(s.sl)
 			s.sl = nil
 			return func() tea.Msg { return upCard }
@@ -118,6 +120,7 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 			}
 			cl, _ = cl.Next()
 		}
+		storage.CreateCardLabel(s.sc.Id, s.sl.Id)
 		s.sc.AddLabel(s.sl)
 		s.sl = nil
 		return func() tea.Msg { return upCard }
