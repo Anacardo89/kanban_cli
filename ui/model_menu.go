@@ -116,8 +116,11 @@ func (m *Menu) keyPress(msg tea.KeyMsg) tea.Cmd {
 	case "e":
 		m.menu.Export()
 	case "i":
-		m.menu.Import()
-		m.UpdateMenu()
+		if m.empty {
+			m.menu.Import()
+			m.UpdateMenu()
+			m.empty = false
+		}
 	case "n":
 		return m.textinput.Focus()
 	case "r":
