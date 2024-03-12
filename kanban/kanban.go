@@ -1,11 +1,11 @@
 /*
 Menu
-  |-Project
-    |-Label
-	|-Board
-	  |-Card
-		|-CheckList
-		|-CardLabels
+	|-Project
+		|-Label
+		|-Board
+			|-Card
+				|-CheckList
+				|-CardLabels
 */
 
 package kanban

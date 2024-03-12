@@ -16,6 +16,7 @@ func main() {
 	}
 	defer f.Close()
 
+	storage.SetPaths()
 	if storage.DBExists() {
 		storage.OpenDB()
 	} else {

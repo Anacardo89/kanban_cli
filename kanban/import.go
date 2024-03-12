@@ -5,6 +5,10 @@ import (
 	"github.com/Anacardo89/kanboards/storage"
 )
 
+var (
+	labelMap = make(map[int64]int64)
+)
+
 func (m *Menu) Import() {
 	data := storage.FromFile()
 	menu := storage.FromYAML(data)
@@ -19,7 +23,7 @@ func (m *Menu) projectsFromStorage(sp []storage.Project) {
 			logger.Error.Println(err)
 		}
 		m.AddProject(id, sp[i].Title)
-		p := m.GetProjectById(sp[i].Id)
+		p := m.GetProjectById(id)
 		p.labelsFromStorage(sp[i].Labels)
 		p.boardsFromStorage(sp[i].Boards)
 	}
@@ -32,6 +36,7 @@ func (p *Project) labelsFromStorage(sl []storage.Label) {
 		if err != nil {
 			logger.Error.Println(err)
 		}
+		labelMap[sl[i].Id] = id
 		p.AddLabel(id, sl[i].Title, sl[i].Color)
 	}
 }
@@ -44,7 +49,7 @@ func (p *Project) boardsFromStorage(sb []storage.Board) {
 			logger.Error.Println(err)
 		}
 		p.AddBoard(id, sb[i].Title)
-		b := p.GetBoardById(sb[i].Id)
+		b := p.GetBoardById(id)
 		b.cardsFromStorage(sb[i].Cards, p)
 	}
 }
@@ -58,7 +63,7 @@ func (b *Board) cardsFromStorage(sc []storage.Card, p *Project) {
 		}
 		storage.UpdateCardDesc(id, sc[i].Description)
 		b.AddCard(id, sc[i].Title, sc[i].Description)
-		c := b.GetCardById(sc[i].Id)
+		c := b.GetCardById(id)
 		c.checkListFromStorage(sc[i].CheckList)
 		c.cardLabelsFromStorage(sc[i].CardLabels, p)
 	}
@@ -81,8 +86,8 @@ func (c *Card) checkListFromStorage(sci []storage.CheckItem) {
 
 func (c *Card) cardLabelsFromStorage(scl []storage.Label, p *Project) {
 	for i := 0; i < len(scl); i++ {
-		storage.CreateCardLabel(c.Id, scl[i].Id)
-		l := p.GetLabelById(scl[i].Id)
+		storage.CreateCardLabel(c.Id, labelMap[scl[i].Id])
+		l := p.GetLabelById(labelMap[scl[i].Id])
 		c.AddLabel(l)
 	}
 }

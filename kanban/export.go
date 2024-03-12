@@ -20,8 +20,8 @@ func (m *Menu) projectsToStorage() []storage.Project {
 		project := storage.Project{
 			Id:     projectVal.Id,
 			Title:  projectVal.Title,
-			Boards: projectVal.boardsToStorage(),
 			Labels: projectVal.labelsToStorage(),
+			Boards: projectVal.boardsToStorage(),
 		}
 		projects = append(projects, project)
 	}

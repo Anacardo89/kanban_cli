@@ -119,7 +119,9 @@ func (m *Menu) keyPress(msg tea.KeyMsg) tea.Cmd {
 		if m.empty {
 			m.menu.Import()
 			m.UpdateMenu()
-			m.empty = false
+			if m.menu.Projects.Length() > 0 {
+				m.empty = false
+			}
 		}
 	case "n":
 		return m.textinput.Focus()

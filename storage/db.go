@@ -15,17 +15,24 @@ const (
 )
 
 var (
-	dbPath string
-	DB     *sql.DB
+	home     string
+	dbPath   string
+	yamlPath string
+	DB       *sql.DB
 )
 
-func DBExists() bool {
-	home, err := os.UserHomeDir()
+func SetPaths() {
+	var err error
+	home, err = os.UserHomeDir()
 	if err != nil {
-		logger.Error.Fatal("Cannot extract HOME:", err)
+		logger.Error.Fatal("Cannot get HOME:", err)
 	}
 	dbPath = home + "/kanboards/db.db"
-	_, err = os.Open(dbPath)
+	yamlPath = home + "/kanboards/kb.yaml"
+}
+
+func DBExists() bool {
+	_, err := os.Open(dbPath)
 	return err == nil
 }
 
@@ -35,6 +42,13 @@ func OpenDB() {
 	if err != nil {
 		logger.Error.Fatal("Cannot establish DB connection:", err)
 		err = nil
+	}
+}
+
+func CreateDBfile() {
+	err := os.Mkdir(home+"/kanboards", 0755)
+	if err != nil {
+		logger.Error.Println("Cannot create working directory:", err)
 	}
 }
 
@@ -100,12 +114,4 @@ func CreateDBTables() {
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt, err)
 	}
-}
-
-func CreateDBfile() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		logger.Error.Println("Cannot extract HOME:", err)
-	}
-	os.Mkdir(home+"/kanboards", 0755)
 }

@@ -14,8 +14,8 @@ type Menu struct {
 type Project struct {
 	Id     int64   `yaml:"id"`
 	Title  string  `yaml:"title"`
-	Boards []Board `yaml:"boards"`
 	Labels []Label `yaml:"labels"`
+	Boards []Board `yaml:"boards"`
 }
 
 type Board struct {
@@ -64,7 +64,6 @@ func FromYAML(data []byte) *Menu {
 }
 
 func ToFile(data string) {
-	yamlPath := "./kb.yaml"
 	f, err := os.Create(yamlPath)
 	if err != nil {
 		logger.Error.Println(err)
@@ -74,7 +73,6 @@ func ToFile(data string) {
 }
 
 func FromFile() []byte {
-	yamlPath := "./kb.yaml"
 	data, err := os.ReadFile(yamlPath)
 	if err != nil {
 		logger.Error.Println(err)
