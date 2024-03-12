@@ -100,10 +100,10 @@ func (s *Selector) checkUpFlag() tea.Cmd {
 		s.p.UpdateProject()
 		return func() tea.Msg { return projectState }
 	case upLabel:
+		s.update = upNone
 		if s.sc == nil {
 			return func() tea.Msg { return labelState }
 		}
-		s.update = upNone
 		s.sl = s.l.getLabel()
 		cl, _ := s.sc.CardLabels.HeadNode()
 		if cl != nil {
