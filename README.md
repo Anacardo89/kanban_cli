@@ -1,7 +1,7 @@
 # Kanboards - a Kanban CLI app  
 ![image](demo.gif)  
 
-Kanboards is a kanban CLI app designed to customizable and portable.  
+Kanboards is a kanban CLI app designed to be customizable and portable.  
 
 ### Install:  
 For rn, just clone the repo and `go get` the dependencies, i'm working on getting a vendor directory going  
