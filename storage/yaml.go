@@ -64,7 +64,14 @@ func FromYAML(data []byte) *Menu {
 }
 
 func ToFile(data string) {
-	f, err := os.Create(yamlPath)
+	f, err := os.Open(yamlPath)
+	if err == nil {
+		os.Remove(yamlPath)
+	} else {
+		logger.Error.Println(err)
+	}
+	f.Close()
+	f, err = os.Create(yamlPath)
 	if err != nil {
 		logger.Error.Println(err)
 	}

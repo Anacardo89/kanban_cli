@@ -210,8 +210,8 @@ func (p *Project) viewBoards() string {
 	inputStyled := p.inputStyled()
 	return lipgloss.Place(
 		ws.width, ws.height,
-		lipgloss.Left, lipgloss.Top,
-		lipgloss.JoinVertical(lipgloss.Left,
+		lipgloss.Center, lipgloss.Top,
+		lipgloss.JoinVertical(lipgloss.Center,
 			titleStyled,
 			boardsStyled,
 			inputStyled,
@@ -304,9 +304,9 @@ func (p *Project) listFromBoard(b *kanban.Board, selected bool) (list.Model, err
 		items []list.Item
 	)
 	if selected {
-		l = list.New([]list.Item{}, cardDelegate, ws.width/3, ws.height-9)
+		l = list.New([]list.Item{}, cardDelegate, ws.width/4, ws.height-9)
 	} else {
-		l = list.New([]list.Item{}, unfocusedCardDelegate, ws.width/3, ws.height-9)
+		l = list.New([]list.Item{}, unfocusedCardDelegate, ws.width/4, ws.height-9)
 	}
 	l.SetShowHelp(false)
 	l.Title = b.Title
