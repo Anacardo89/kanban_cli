@@ -246,8 +246,8 @@ func (m *Menu) viewMenu() string {
 	}
 	return lipgloss.Place(
 		ws.width, ws.height,
-		lipgloss.Left, lipgloss.Top,
-		lipgloss.JoinVertical(lipgloss.Left,
+		lipgloss.Center, lipgloss.Top,
+		lipgloss.JoinVertical(lipgloss.Center,
 			menuStyled,
 			bottomLines,
 			inputStyled,
@@ -270,14 +270,15 @@ var menuDelegate = list.NewDefaultDelegate()
 func setMenuDelegate() {
 	menuDelegate.ShowDescription = false
 	menuDelegate.SetSpacing(0)
-	menuDelegate.Styles.NormalTitle.Foreground(WHITE)
-	menuDelegate.Styles.SelectedTitle.Foreground(YELLOW).
-		Border(lipgloss.HiddenBorder(), false, false, false, true)
+	menuDelegate.Styles.NormalTitle = lipgloss.NewStyle().Foreground(WHITE).
+		Padding(0, 1)
+	menuDelegate.Styles.SelectedTitle = lipgloss.NewStyle().Foreground(YELLOW).
+		Padding(0, 1)
 }
 
 func (m *Menu) setList() {
 	var menuItems []list.Item
-	l := list.New([]list.Item{}, menuDelegate, ws.width/3, ws.height-6)
+	l := list.New([]list.Item{}, menuDelegate, ws.width/2-7, ws.height-6)
 	l.SetShowHelp(false)
 	l.Title = "Projects"
 	l.InfiniteScrolling = true

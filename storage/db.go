@@ -27,7 +27,7 @@ func SetPaths() {
 	if err != nil {
 		logger.Error.Fatal("Cannot get HOME:", err)
 	}
-	dbPath = home + "/kanboards/db.db"
+	dbPath = home + "/kanboards/kb.db"
 	yamlPath = home + "/kanboards/kb.yaml"
 }
 

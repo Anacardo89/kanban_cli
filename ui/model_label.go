@@ -381,7 +381,7 @@ var labelDelegate = NewLabelListDelegate()
 
 func (l *Label) setList() {
 	var labelItems []list.Item
-	lst := list.New([]list.Item{}, labelDelegate, ws.width/3, ws.height-9)
+	lst := list.New([]list.Item{}, labelDelegate, ws.width/2, ws.height-9)
 	lst.SetShowHelp(false)
 	lst.Title = "Labels"
 	lst.InfiniteScrolling = true

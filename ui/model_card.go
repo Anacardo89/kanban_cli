@@ -378,20 +378,22 @@ func (c *Card) renderCard() string {
 	case labelPos:
 		cardlabelsStyled = SelectedListStyle.Render(c.labels.View())
 	}
+
 	listsStyled := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		checklistStyled,
 		cardlabelsStyled,
 	)
-	return CardStyle.Render(lipgloss.JoinVertical(
-		lipgloss.Left,
-		titleStyled,
-		c.card.Title,
-		emptyLine,
-		descriptionStyled,
-		txtareaStyled,
-		listsStyled,
-	))
+
+	return CardStyle.Render(
+		lipgloss.JoinVertical(lipgloss.Left,
+			titleStyled,
+			c.card.Title,
+			emptyLine,
+			descriptionStyled,
+			txtareaStyled,
+			listsStyled,
+		))
 }
 
 // bubbles
@@ -404,6 +406,7 @@ func (c *Card) setInput() {
 
 // textarea
 func (c *Card) setTxtArea() {
+	c.textarea.SetWidth(ws.width / 2)
 	c.textarea.Prompt = ""
 	c.textarea.Placeholder = "Card Description"
 	c.textarea.ShowLineNumbers = true
