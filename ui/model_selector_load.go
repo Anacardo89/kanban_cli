@@ -21,7 +21,7 @@ func DBToQueue() queue.Queue {
 		for _, label := range labels {
 			q.Enqueue(label)
 		}
-		boards := storage.GetBoardsWithParent(project.Id)
+		boards := storage.GetBoardsWithParentOrdered(project.Id)
 		for _, board := range boards {
 			q.Enqueue(board)
 			cards := storage.GetCardsWithParent(board.Id)

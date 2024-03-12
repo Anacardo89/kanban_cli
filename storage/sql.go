@@ -9,6 +9,7 @@ const (
 	CreateTableBoards = `
 	CREATE TABLE IF NOT EXISTS boards (
 		id INTEGER PRIMARY KEY,
+		position INTEGER,
 		title TEXT NOT NULL,
 		project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE
 	);`
@@ -60,16 +61,22 @@ const (
 	// boards
 	SelectAllBoardsSql = `
 	SELECT * FROM boards;`
-	SelectBoardsWithParentSql = `
+	SelectBoardsWithParentOrderedSql = `
 	SELECT * FROM boards
-		WHERE project_id = ?1;`
+		WHERE project_id = ?1
+		ORDER BY position ASC;`
 	CreateBoardSql = `
 	INSERT INTO boards (title, project_id)
 		VALUES (?1, ?2)
 		RETURNING *;`
-	UpdateBoardSql = `
+	UpdateBoardTitleSql = `
 	UPDATE boards
 		SET title = ?2
+		WHERE id = ?1
+		RETURNING *;`
+	UpdateBoardPositionSql = `
+	UPDATE boards
+		SET position = ?2
 		WHERE id = ?1
 		RETURNING *;`
 	DeleteBoardSql = `

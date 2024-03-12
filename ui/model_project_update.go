@@ -139,7 +139,7 @@ func (p *Project) txtInputEnter() {
 			p.project.RenameProject(p.textinput.Value())
 		} else {
 			b := p.getBoard()
-			storage.UpdateBoard(b.Id, p.textinput.Value())
+			storage.UpdateBoardTitle(b.Id, p.textinput.Value())
 			b.RenameBoard(p.textinput.Value())
 		}
 	}
@@ -192,12 +192,31 @@ func (p *Project) flagMvBoard(msg tea.KeyMsg) tea.Cmd {
 	case "l", "right":
 		p.moveBoardRight()
 	case "enter", "esc":
+		p.updateBoardPos()
 		p.flag = none
 		p.moveFrom = []int{-1, 0}
 		return nil
 	}
 	p.boards[p.cursor], cmd = p.boards[p.cursor].Update(msg)
 	return cmd
+}
+
+func (p *Project) updateBoardPos() {
+	curr, err := p.project.Boards.HeadNode()
+	if err != nil {
+		logger.Error.Println(err)
+		err = nil
+	}
+	for i := 0; i < p.project.Boards.Length(); i++ {
+		b := curr.Val().(*kanban.Board)
+		b.Pos = i
+		storage.UpdateBoardPosition(b.Id, b.Pos)
+		curr, err = curr.Next()
+		if err != nil {
+			logger.Error.Println(err)
+			err = nil
+		}
+	}
 }
 
 func (p *Project) flagMvCard(msg tea.KeyMsg) tea.Cmd {
@@ -319,6 +338,7 @@ func (p *Project) keyPressN() tea.Cmd {
 // move
 func (p *Project) moveBoardLeft() {
 	b := p.getBoard()
+
 	bVal := *b
 	p.project.Boards.RemoveAt(p.cursor)
 	if p.cursor == 0 {

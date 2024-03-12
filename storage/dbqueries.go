@@ -70,6 +70,7 @@ func DeleteProject(id int64) {
 // boards
 type BoardSql struct {
 	Id        int64
+	Position  sql.NullInt32
 	Title     string
 	ProjectId int64
 }
@@ -85,6 +86,7 @@ func GetAllBoards() []BoardSql {
 		var i BoardSql
 		if err := rows.Scan(
 			&i.Id,
+			&i.Position,
 			&i.Title,
 			&i.ProjectId,
 		); err != nil {
@@ -95,9 +97,9 @@ func GetAllBoards() []BoardSql {
 	return items
 }
 
-func GetBoardsWithParent(projectId int64) []BoardSql {
+func GetBoardsWithParentOrdered(projectId int64) []BoardSql {
 	var items []BoardSql
-	rows, err := DB.Query(SelectBoardsWithParentSql, projectId)
+	rows, err := DB.Query(SelectBoardsWithParentOrderedSql, projectId)
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt)
 	}
@@ -106,6 +108,7 @@ func GetBoardsWithParent(projectId int64) []BoardSql {
 		var i BoardSql
 		if err := rows.Scan(
 			&i.Id,
+			&i.Position,
 			&i.Title,
 			&i.ProjectId,
 		); err != nil {
@@ -128,12 +131,24 @@ func CreateBoard(title string, projectId int64) sql.Result {
 	return res
 }
 
-func UpdateBoard(id int64, title string) sql.Result {
-	stmt, err := DB.Prepare(UpdateBoardSql)
+func UpdateBoardTitle(id int64, title string) sql.Result {
+	stmt, err := DB.Prepare(UpdateBoardTitleSql)
 	if err != nil {
 		logger.Error.Fatal(ErrCreatSQLstmt, err)
 	}
 	res, err := stmt.Exec(id, title)
+	if err != nil {
+		logger.Error.Fatal(ErrExecSQLstmt, err)
+	}
+	return res
+}
+
+func UpdateBoardPosition(id int64, pos int) sql.Result {
+	stmt, err := DB.Prepare(UpdateBoardPositionSql)
+	if err != nil {
+		logger.Error.Fatal(ErrCreatSQLstmt, err)
+	}
+	res, err := stmt.Exec(id, pos)
 	if err != nil {
 		logger.Error.Fatal(ErrExecSQLstmt, err)
 	}
