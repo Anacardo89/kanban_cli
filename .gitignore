@@ -17,6 +17,7 @@
 
 # DB files
 *.db
+*.yaml
 
 # Log files
 *.log

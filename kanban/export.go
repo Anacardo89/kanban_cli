@@ -4,11 +4,12 @@ import (
 	"github.com/Anacardo89/kanboards/storage"
 )
 
-func (m *Menu) ToStorage() *storage.Menu {
+func (m *Menu) Export() {
 	projects := m.projectsToStorage()
-	return &storage.Menu{
+	sm := storage.Menu{
 		Projects: projects,
 	}
+	storage.ToFile(sm.ToYAML())
 }
 
 func (m *Menu) projectsToStorage() []storage.Project {
@@ -17,6 +18,7 @@ func (m *Menu) projectsToStorage() []storage.Project {
 		projectNode, _ := m.Projects.GetNodeAt(i)
 		projectVal := projectNode.Val().(*Project)
 		project := storage.Project{
+			Id:     projectVal.Id,
 			Title:  projectVal.Title,
 			Boards: projectVal.boardsToStorage(),
 			Labels: projectVal.labelsToStorage(),
@@ -32,6 +34,8 @@ func (p *Project) boardsToStorage() []storage.Board {
 		boardNode, _ := p.Boards.GetNodeAt(i)
 		boardVal := boardNode.Val().(*Board)
 		board := storage.Board{
+			Id:    boardVal.Id,
+			Pos:   boardVal.Pos,
 			Title: boardVal.Title,
 			Cards: boardVal.cardsToStorage(),
 		}
@@ -46,6 +50,7 @@ func (p *Project) labelsToStorage() []storage.Label {
 		labelNode, _ := p.Labels.GetNodeAt(i)
 		labelVal := labelNode.Val().(*Label)
 		label := storage.Label{
+			Id:    labelVal.Id,
 			Title: labelVal.Title,
 			Color: labelVal.Color,
 		}
@@ -60,6 +65,7 @@ func (b *Board) cardsToStorage() []storage.Card {
 		cardNode, _ := b.Cards.GetNodeAt(i)
 		cardVal := cardNode.Val().(*Card)
 		card := storage.Card{
+			Id:          cardVal.Id,
 			Title:       cardVal.Title,
 			Description: cardVal.Description,
 			CheckList:   cardVal.checkListToStorage(),
@@ -76,6 +82,7 @@ func (c *Card) checkListToStorage() []storage.CheckItem {
 		checkNode, _ := c.CheckList.GetNodeAt(i)
 		checkVal := checkNode.Val().(*CheckItem)
 		checkItem := storage.CheckItem{
+			Id:    checkVal.Id,
 			Title: checkVal.Title,
 			Check: checkVal.Check,
 		}
@@ -90,6 +97,7 @@ func (c *Card) cardLabelsToStorage() []storage.Label {
 		cardLabelNode, _ := c.CardLabels.GetNodeAt(i)
 		cardLabelVal := cardLabelNode.Val().(*Label)
 		cardLabel := storage.Label{
+			Id:    cardLabelVal.Id,
 			Title: cardLabelVal.Title,
 			Color: cardLabelVal.Color,
 		}

@@ -1,11 +1,11 @@
 /*
 Menu
-  |_Project
-    |_Label
-	|_List
-	  |_Card
-		|_CheckList
-		|_CardLabels
+  |-Project
+    |-Label
+	|-Board
+	  |-Card
+		|-CheckList
+		|-CardLabels
 */
 
 package kanban
@@ -28,6 +28,7 @@ type Project struct {
 
 type Board struct {
 	Id    int64
+	Pos   int
 	Title string
 	Cards dll.DLL
 }
@@ -96,6 +97,7 @@ func (p *Project) RenameProject(title string) {
 func (p *Project) AddBoard(id int64, title string) {
 	board := &Board{
 		Id:    id,
+		Pos:   p.Boards.Length(),
 		Title: title,
 		Cards: dll.New(),
 	}
