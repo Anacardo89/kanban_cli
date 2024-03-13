@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/Anacardo89/kanboards/fsops"
 	"github.com/Anacardo89/kanboards/logger"
 	"github.com/Anacardo89/kanboards/storage"
 	"github.com/Anacardo89/kanboards/ui"
@@ -10,17 +11,16 @@ import (
 )
 
 func main() {
+	fsops.SetPaths()
 	f, err := logger.CreateLogger()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	storage.SetPaths()
 	if storage.DBExists() {
 		storage.OpenDB()
 	} else {
-		storage.CreateDBfile()
 		storage.CreateDBTables()
 	}
 	defer storage.DB.Close()
