@@ -14,7 +14,7 @@ Kanboards is a Trello clone for the CLI designed to be customizable and portable
 - [bubbletea](https://github.com/charmbracelet/bubbletea)
 - [lipgloss](https://github.com/charmbracelet/lipgloss)  
 - [bubbles](https://github.com/charmbracelet/bubbles)
-- [ds](https://github.com/Anacardo89/ds)
+- [ds](https://github.com/Anacardo89/ds)  
 3 -  `go run .`
 
 ### Usage:  
