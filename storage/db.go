@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 
+	"github.com/Anacardo89/kanboards/fsops"
 	"github.com/Anacardo89/kanboards/logger"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -14,46 +15,24 @@ const (
 	ErrSQLrowScan   string = "Error scanning rows:"
 )
 
-var (
-	home     string
-	dbPath   string
-	yamlPath string
-	DB       *sql.DB
-)
-
-func SetPaths() {
-	var err error
-	home, err = os.UserHomeDir()
-	if err != nil {
-		logger.Error.Fatal("Cannot get HOME:", err)
-	}
-	dbPath = home + "/kanboards/kb.db"
-	yamlPath = home + "/kanboards/kb.yaml"
-}
+var DB *sql.DB
 
 func DBExists() bool {
-	_, err := os.Open(dbPath)
+	_, err := os.Open(fsops.DBPath)
 	return err == nil
 }
 
 func OpenDB() {
 	var err error
-	DB, err = sql.Open("sqlite3", dbPath)
+	DB, err = sql.Open("sqlite3", fsops.DBPath)
 	if err != nil {
 		logger.Error.Fatal("Cannot establish DB connection:", err)
 		err = nil
 	}
 }
 
-func CreateDBfile() {
-	err := os.Mkdir(home+"/kanboards", 0755)
-	if err != nil {
-		logger.Error.Println("Cannot create working directory:", err)
-	}
-}
-
 func CreateDBTables() {
-	file, err := os.OpenFile(dbPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	file, err := os.OpenFile(fsops.DBPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		logger.Error.Fatal("Cannot open DB file:", err)
 	}

@@ -3,6 +3,7 @@ package storage
 import (
 	"os"
 
+	"github.com/Anacardo89/kanboards/fsops"
 	"github.com/Anacardo89/kanboards/logger"
 	"gopkg.in/yaml.v2"
 )
@@ -64,14 +65,14 @@ func FromYAML(data []byte) *Menu {
 }
 
 func ToFile(data string) {
-	f, err := os.Open(yamlPath)
+	f, err := os.Open(fsops.YamlPath)
 	if err == nil {
-		os.Remove(yamlPath)
+		os.Remove(fsops.YamlPath)
 	} else {
 		logger.Error.Println(err)
 	}
 	f.Close()
-	f, err = os.Create(yamlPath)
+	f, err = os.Create(fsops.YamlPath)
 	if err != nil {
 		logger.Error.Println(err)
 	}
@@ -80,7 +81,7 @@ func ToFile(data string) {
 }
 
 func FromFile() []byte {
-	data, err := os.ReadFile(yamlPath)
+	data, err := os.ReadFile(fsops.YamlPath)
 	if err != nil {
 		logger.Error.Println(err)
 	}
