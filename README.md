@@ -1,7 +1,7 @@
 # Kanboards - a Kanban CLI app  
 ![image](demo.gif)  
 
-Kanboards is a Trello CLI clone designed to be customizable and portable:  
+Kanboards is a Trello clone for the CLI designed to be customizable and portable:  
 - manage multiple projects
 - add/remove boards and move them around
 - tasks have checklists to further divide work
