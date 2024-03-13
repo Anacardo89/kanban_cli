@@ -11,10 +11,10 @@ Kanboards is a Trello clone for the CLI designed to be customizable and portable
 ### Install:  
 1. install [go](https://go.dev/doc/install)
 2.  Clone the repo and get the dependencies:  
-    1. [bubbletea](https://github.com/charmbracelet/bubbletea)
-    2. [lipgloss](https://github.com/charmbracelet/lipgloss)  
-    3. [bubbles](https://github.com/charmbracelet/bubbles)
-    4. [ds](https://github.com/Anacardo89/ds)  
+    - [bubbletea](https://github.com/charmbracelet/bubbletea)
+    - [lipgloss](https://github.com/charmbracelet/lipgloss)  
+    - [bubbles](https://github.com/charmbracelet/bubbles)
+    - [ds](https://github.com/Anacardo89/ds)  
 3.  `go run .`
 
 ### Usage:  
